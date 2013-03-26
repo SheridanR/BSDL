@@ -1,0 +1,9 @@
+images/duct1.bmp
+images/stones2.bmp
+images/dirt2.bmp
+images/metaltile.bmp
+images/cave.bmp
+images/floor1.bmp
+images/mosstone.bmp
+images/brwnrock.bmp
+images/ceiling1.bmp

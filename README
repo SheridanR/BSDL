@@ -1,0 +1,59 @@
+Welcome to Bubbenstein/SDL (aka BSDL)!
+
+The history of this game engine is long and complex. To put it simply, BSDL is a project that was started August 1st, 2011 as a fork of a much older project that was started sometime in late 2010... and as of this writing, I haven't really touched the code in a whole year, so hold onto your hat if you decide to go digging. :)
+
+----- FEATURES -----
+
+1) Support for multiple platforms, including Windows and Linux (it's probably possible to compile the engine for MacOS X too without any modification, but I cannot test this)
+
+2) 24-bit graphics at 640x480 resolution
+
+3) Accurate grid-based collision detection
+
+4) A complex heightmap world format (stairs, platforms, windows, and buildings are all possible constructions)
+
+5) Scaling sprites of any shape and size
+
+6) Wall, floor, and ceiling textures (dimensions must be a power of 2)
+
+7) Depth based lighting effects
+
+8) A complex entity subsystem for in-game objects, particles, and actors
+
+I personally have a makeshift world editor to make game maps, but the interface is nasty, the code is ugly, and the thingy can only be built on Linux. I'd be willing to pass any interested person some builds/code if they really wanted it, but to tell the truth, I'd be far more interested if said person were willing to work with me to build a new set of tools from scratch. :)
+
+----- HOW TO USE -----
+
+The core engine is still in a basic state right now. If you start it up without any arguments, it will load "testmap.bsm". You can pass other filenames to the engine to have it load different maps. This is possible both at the command line and by dragging and dropping the map files to the engine in Windows.
+
+There is not much to do besides wandering around, shooting at the walls, and spawning space troopers. Regardless, here are the controls for the game:
+
+Escape			-	Close the program
+W, A, S, D		-	Move forward, left, backwards, and right, respectively
+Shift			-	Speed movement modifier
+Alt				-	Strafe movement modifier
+Space			-	Jump key
+Mouse			-	Look up, down, left, and right
+Mouse Button 0		-	Attack
+F6				-	Throw a screenshot to the "shots" folder
+N				-	Activates "noclip" as long as the key is pressed
+I				-	Spawn an actor
+
+----- CONTACT -----
+
+All suggestions, comments, and questions should be sent to: sheridan.rathbun@gmail.com
+
+No matter who you are, I would very much like to hear from you. :)
+
+----- LEGALESE -----
+
+As someone who has downloaded this program, you are free to run, modify, and distribute it as you please. The only stipulation is that you charge no money for its redistribution or claim original authorship of it.
+
+The resources used by this game engine (namely, the image files) were either designed by me or collected from a variety of free libraries. The actor files come from the Freedoom project.
+
+I encourage other programmers to dig into the source code supplied with the engine. I am happy to help any aspiring programmers out there to get a feel for how engines like this tick.
+
+BSDL makes use of the SPriG library by John Dearborn.
+
+Sheridan Kane Rathbun
+2013/03/26

@@ -1,0 +1,140 @@
+Note (2013/03/26): For a rather long time, this is what I used to keep track of the changes I made to this project.
+
+----- CHANGE LOG -----
+
+Events for each day are listed in chronological order.
+
+2011, June 8th:
+	* Began converting Bubbenstein for Windows to SDL; began BSDL project.
+
+2011, June 9th:
+	* Finished conversion of Bubbenstein for Windows to SDL. BSDL is now inherently cross-compatible with all three major operating systems (Linux, MacOS X, Windows).
+	* Tracked down and eliminated some memory leaks with Valgrind debugger.
+	* Engine now operates in FULLSCREEN mode.
+	* Minor optimizations of renderer.
+	* Adjusted player physics.
+	* Added mouse look.
+	* Began designing BSDL MAP format.
+	* Backed up source directory.
+
+2011, June 10th:
+	* Greatly improved collision detection code. Objects can now exceed speeds greater than 1 cell/cycle without stopping very short of a wall or plowing through it entirely.
+	* Added "Marathon style" camera bobbing and tweaked player movement code.
+	* Fixed bug in drawfloors() that caused segmentation fault when view angle was greater than yres/2.
+	* Placed images and docs into separate folders.
+
+2011, June 11th:
+	* Finished designing BSDL MAP format.
+	* Splitting source into multiple files. Creating naming convention for source files.
+
+2011, June 12th:
+	* Finished dividing source into several files.
+	* Reworking engine to handle maps of a dynamic size.
+	* Writing code to have engine read texture information from maps.
+
+2011, June 13th:
+	* Finished reworking engine to handle dynamic map sizes.
+	* Finished writing code to handle the assignment of wall, floor, and ceiling textures.
+
+2011, June 14th:
+	* Modified program source directory.
+	* Improved documentation.
+
+2011, June 15th:
+	* Shot, cropped, and edited lots of photos that show me holding a few weapons.
+	* Wrote some basic first-person weapon code.
+
+2011, June 16th-17th:
+	* Took a vacation to the Ohio USAF Museum. :)
+
+2011, June 18th:
+	* Backed up source directory.
+	* Began writing new sky rendering code.
+
+2012, June 19th:
+	* Finished writing new sky rendering code.
+	* Added new code to prevent the engine from accessing non-existant texture data.
+	* Fixed bug regarding the misselection of floor/ceiling textures in r_DrawFloors(). "floorbuffer" now also contains texture index numbers for each pixel.
+	* Fixed some memory leaks caused by a total lack of deallocating certain bitmaps.
+	* Adjusted collision code so that e_CheckCells() will automatically clip velocities exceeding map dimensions.
+	* Converted all three space sequences in the code to tab indentations, and cleaned up indentations.
+	* Reworked the code so that tabs are used to indent the code instead of spaces. Easier to maintain, and the code looks good in all editors now.
+	* Created a new documentation file, SOURCE.TXT, that describes the various conventions I use when writing the source code for BSDL.
+	* Backed up the source directory.
+	* Improved collision detection code. The player's vertical position is now properly calculated across multiple cells.
+
+2011, June 20th:
+	* Began removing player variables and replacing them with a player entity.
+	* Began making collision code applicable to all entities besides the player.
+
+2011, June 21st:
+	* Finished transferring all player data to an entity structure. The player can now be referenced by accessing "entity_t* player"
+	* Moved all player handling code to a new behavior function, "e_Player()" This behavior can be assigned to an entity to give the player full control over it.
+	* Modified the entity_t* structure to include what was once a player-only variable, "onground." Can be used to determine whether an entity is on the floor or not.
+	* Finished making collision code applicable to all entities. Entities can now move like the player with full collision detection.
+	* Added entity collision detection. Entities can now collide with one another. So far, I have observed no errors with this.
+	* Added code to allow entities to move over and under eachother. Entities can also climb eachother like staircases now.
+	* Backed up source directory.
+	* Made a TODO.TXT list.
+	
+2011, June 24th:
+	* Changed the "behavior" entity attribute to be a function pointer, rather than a character string.
+	
+2011, June 26th:
+	* Optimized all drawing functions a bit.
+	
+2011, June 27th:
+	* Added the ability to press Alt-Enter to toggle fullscreen/windowed mode.
+
+2011, June 28th:
+	* Added a simple i_PrintText function that draws a formatted string on the string using a bitmap font.
+
+2011, June 29th:
+	* Removed all "goto" statements from source code and replaced them with better loops.
+	* Added screen scaling so that video drivers that don't support 320x240 automatically scale the screen to fit a 640x480 resolution, which is supported by all drivers.
+	
+2011, July 6th:
+	* Changed code to load textures and sprites from text files to easily facilitate the addition and removal of textures/sprites.
+	* Modified floor/ceiling drawing code so that it can use images that are larger or smaller than 64x64.
+
+2011, July 7th:
+	* Removed the ability to toggle fullscreen mode with Alt+Enter.
+	* Added the ability to take screenshots with F6.
+	* Backed up source directory.
+
+2011, July 9th:
+	* Modified rendering code so that there is no chance of floor spans to appear on cells whose floor and ceiling meet.
+
+2011, July 19th:
+	* Modified game code structure so that it compiles source files individually into object files and links them together, rather than stringing them all together into one object file with "include" statements.
+
+2011, July 20th:
+	* Began work on BSDL map editor
+
+2011, July 21st:
+	* Finished work on basic geometry editing functions in the map editor
+
+2011, July 22nd:
+	* Modified game code to load map files produced by the editor. Map files can be loaded by specifying one on the command line.
+	* Finished adding save map, load map, new map, and map properties functions to the editor.
+
+2011, July 23rd:
+	* Added some nice confirmation windows to the map editor.
+	* Backed up source directory.
+
+2011, July 28th:
+	* Kevin Higgins made two nice font types images. Modified font engine to use standard ASCII fonts.
+	
+2012, March 9th:
+	* Back after a nearly nine month long (!) hiatus. I got the thingy compiled and running under Windows, so tomorrow I think I will sync the code between my linux box and my windows box and repo the whole project.
+	* Sound code soon...?
+	* Read WAD files...?
+
+2012, March 10th:
+	* Added a bunch of entity code so that the engine can cycle animations as well as correctly deal with directional sprites (NPCs).
+
+2012, March 12th:
+	* Reworked sky drawing code. Old algorithm was slower, flawed, and expected a weird image size. Now it's all straightened out. :)
+
+2012, April 13th:
+	* HUD sprites and sky now scale with the screen resolution.
