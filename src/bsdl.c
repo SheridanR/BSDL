@@ -4,8 +4,8 @@
 	File: bsdl.h
 	Desc: defines all external prototypes in bsdl.h
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -15,8 +15,7 @@
 entity_t *firstentity = NULL; // first entity in list
 entity_t *lastentity = NULL;  // last entity in list
 
-int sgn( double expr )
-{
+int sgn( double expr ) {
 	if( expr < 0 ) return(-1);
 	else if( expr == 0 ) return(0);
 	else return(1);
@@ -90,5 +89,5 @@ unsigned int sprite_num;
 bitmap_t *sprite_bmp;
 
 // weapon textures
-bitmap_t colt45_bmp[3];
-bitmap_t shotgun_bmp[6];
+bitmap_t pistol_bmp[5];
+bitmap_t shotgun_bmp[9];

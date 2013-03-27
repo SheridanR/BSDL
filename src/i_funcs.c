@@ -4,8 +4,8 @@
 	File: i_funcs.c
 	Desc: contains various interface and input functions
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -26,8 +26,7 @@
 
 -------------------------------------------------------------------------------*/
 
-void i_Message( char *fmt, ... )
-{
+void i_Message( char *fmt, ... ) {
 	char str[100];
 	va_list argptr;
 	
@@ -49,8 +48,7 @@ void i_Message( char *fmt, ... )
 
 -------------------------------------------------------------------------------*/
 
-void i_GetFrameRate(void)
-{
+void i_GetFrameRate(void) {
 	// calculate frame rate
 	t = SDL_GetTicks();
 	timesync = (t - ot)/2;
@@ -67,8 +65,7 @@ void i_GetFrameRate(void)
 -------------------------------------------------------------------------------*/
 
 int numshots=0;
-void i_ReceiveInput(void)
-{
+void i_ReceiveInput(void) {
 	char filename[24];
 	char shots[8];
 	SDL_Rect src, dest;
@@ -76,11 +73,9 @@ void i_ReceiveInput(void)
 	
 	mousex = 0;
 	mousey = 0;
-	while( SDL_PollEvent(&event) ) // poll SDL events
-	{
+	while( SDL_PollEvent(&event) ) { // poll SDL events
 		// Global events
-		switch( event.type )
-		{
+		switch( event.type ) {
 			case SDL_QUIT: // if SDL receives the shutdown signal
 				gameloop = 0;
 				break;
@@ -108,8 +103,7 @@ void i_ReceiveInput(void)
 		gameloop = 0;
 	
 	// take screenshots
-	if( keystatus[SDLK_F6] )
-	{
+	if( keystatus[SDLK_F6] ) {
 		keystatus[SDLK_F6] = 0;
 		
 		strcpy( filename, "shots/shot" );

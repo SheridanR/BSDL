@@ -4,8 +4,8 @@
 	File: g_data.c
 	Desc: contains various functions used to open and close the engine.
 	
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 	
 -------------------------------------------------------------------------------*/
 
@@ -20,14 +20,13 @@
 
 /*-------------------------------------------------------------------------------
 	
-	g_Open()
+	g_Open
 	
 	Initializes several variables and loads several files the engine needs.
 	
 -------------------------------------------------------------------------------*/
 
-int g_Open( char *file )
-{
+int g_Open( char *file ) {
 	float screenfactor;
 	unsigned long x, y;
 	FILE *fp;
@@ -45,10 +44,9 @@ int g_Open( char *file )
 	src.h=468*screenfactor; dest.h=0;
 
 	// build some tables
-	for( x=0; x<xres; x++ )
-	{
-		for( y=0; y<yres; y++ )
-		{
+	map.loaded = 0;
+	for( x=0; x<xres; x++ ) {
+		for( y=0; y<yres; y++ ) {
 			floorbuffer_s[y][x][0]=16383;
 			floorbuffer_s[y][x][1]=-1;
 		}
@@ -66,15 +64,13 @@ int g_Open( char *file )
 	SDL_BlitSurface( SPG_Scale( sky2_bmp, screenfactor, screenfactor ), &src, sky_bmp, &dest );
 	//SDL_BlitSurface( sky2_bmp, &src, sky_bmp, &dest );
 	fp = fopen("images/textures.txt","r");
-	for( texture_num=0; !feof(fp); texture_num++ )
-	{
+	for( texture_num=0; !feof(fp); texture_num++ ) {
 		while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
 	}
 	fclose(fp);
 	walltex_bmp = (bitmap_t *) malloc(sizeof(bitmap_t)*texture_num);
 	fp = fopen("images/textures.txt","r");
-	for( x=0; !feof(fp); x++ )
-	{
+	for( x=0; !feof(fp); x++ ) {
 		fscanf(fp,"%s",name); while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
 		r_LoadBmp(name, &walltex_bmp[x]);
 	}
@@ -82,30 +78,33 @@ int g_Open( char *file )
 	
 	// load sprites
 	fp = fopen("images/sprites.txt","r");
-	for( sprite_num=0; !feof(fp); sprite_num++ )
-	{
+	for( sprite_num=0; !feof(fp); sprite_num++ ) {
 		while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
 	}
 	fclose(fp);
 	sprite_bmp = (bitmap_t *) malloc(sizeof(bitmap_t)*sprite_num);
 	fp = fopen("images/sprites.txt","r");
-	for( x=0; !feof(fp); x++ )
-	{
+	for( x=0; !feof(fp); x++ ) {
 		fscanf(fp,"%s",name); while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
 		r_LoadBmp(name, &sprite_bmp[x]);
 	}
 	fclose(fp);
 	
 	// load weapon bitmaps
-	r_LoadBmp( "images/colt45_1.bmp", &colt45_bmp[0] );
-	r_LoadBmp( "images/colt45_2.bmp", &colt45_bmp[1] );
-	r_LoadBmp( "images/colt45_3.bmp", &colt45_bmp[2] );
-	r_LoadBmp( "images/shotgun_1.bmp", &shotgun_bmp[0] );
-	r_LoadBmp( "images/shotgun_2.bmp", &shotgun_bmp[1] );
-	r_LoadBmp( "images/shotgun_1.bmp", &shotgun_bmp[2] );
-	r_LoadBmp( "images/shotgun_3.bmp", &shotgun_bmp[3] );
-	r_LoadBmp( "images/shotgun_4.bmp", &shotgun_bmp[4] );
-	r_LoadBmp( "images/shotgun_3.bmp", &shotgun_bmp[5] );
+	r_LoadBmp( "images/pistol1.bmp", &pistol_bmp[0] );
+	r_LoadBmp( "images/pistol2.bmp", &pistol_bmp[1] );
+	r_LoadBmp( "images/pistol3.bmp", &pistol_bmp[2] );
+	r_LoadBmp( "images/pistol4.bmp", &pistol_bmp[3] );
+	r_LoadBmp( "images/pistol5.bmp", &pistol_bmp[4] );
+	r_LoadBmp( "images/shotgun1.bmp", &shotgun_bmp[0] );
+	r_LoadBmp( "images/shotgun2.bmp", &shotgun_bmp[1] );
+	shotgun_bmp[2] = shotgun_bmp[0];
+	shotgun_bmp[3] = shotgun_bmp[0];
+	r_LoadBmp( "images/shotgun3.bmp", &shotgun_bmp[4] );
+	shotgun_bmp[5] = shotgun_bmp[4];
+	r_LoadBmp( "images/shotgun4.bmp", &shotgun_bmp[6] );
+	shotgun_bmp[7] = shotgun_bmp[4];
+	shotgun_bmp[8] = shotgun_bmp[4];
 
 	// precompute some things
 	sprsize = 2.45*((double)xres/320);
@@ -115,20 +114,18 @@ int g_Open( char *file )
 	if( strstr(file,".bsm") == NULL )
 		strcat(file,".bsm");
 	fp = fopen(file, "rb");
-	if( fp == NULL )
-	{
-		g_Close();
+	if( fp == NULL ) {
 		printf( "ERROR: Could not load map file: %s\n\n", file );
+		g_Close();
 		exit(15);
 	}
 	
 	// validate the file
 	fread(valid_data, sizeof(char), strlen("BSDLMAP"), fp);
-	if( strncmp(valid_data,"BSDLMAP",7) || fgetc(fp) != MAPVERSION )
-	{
-		g_Close();
-		fclose(fp);
+	if( strncmp(valid_data,"BSDLMAP",7) || fgetc(fp) != MAPVERSION ) {
 		printf( "ERROR: Not a valid map file: %s\n\n", file );
+		fclose(fp);
+		g_Close();
 		exit(46);
 	}
 	else
@@ -178,20 +175,18 @@ int g_Open( char *file )
 	bob1 = 0; bob2 = 0; bob3 = 1;
 
 	// initiate SDL
-	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER ) == -1 )
-	{
-		g_Close();
+	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER ) == -1 ) {
 		printf("ERROR: Could not initialize SDL. Aborting...\n\n");
+		g_Close();
 		exit(4);
 	}
 
 	// create a screen surface
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE,xres,yres,32,0,0,0,0); // this is the drawing buffer
 	screen2 = SDL_SetVideoMode( xres*screenscale, yres*screenscale, 32, SDL_HWSURFACE | SDL_FULLSCREEN ); // this is the actual screen surface
-	if( screen == NULL || screen2 == NULL )
-	{
-		g_Close();
+	if( screen == NULL || screen2 == NULL ) {
 		printf("ERROR: Could not create video surface. Aborting...\n\n");
+		g_Close();
 		exit(5);
 	}
 	SDL_WM_SetCaption( "Bubbenstein/SDL\n\n", 0 );
@@ -208,14 +203,13 @@ int g_Open( char *file )
 
 /*-------------------------------------------------------------------------------
 	
-	g_Close()
+	g_Close
 	
 	Frees all memory currently allocated to the data used by the engine.
 	
 -------------------------------------------------------------------------------*/
 
-void g_Close(void)
-{
+void g_Close(void) {
 	long x;
 	
 	// close SDL
@@ -225,8 +219,7 @@ void g_Close(void)
 	e_FreeAll();
 
 	// free world
-	if( map.loaded )
-	{
+	if( map.loaded ) {
 		free(map.floors);
 		free(map.floors_tex);
 		free(map.floors_tex2);
@@ -247,15 +240,15 @@ void g_Close(void)
 	for( x=0; x<sprite_num; x++ )
 		r_FreeBmp( &sprite_bmp[x] );
 
-	r_FreeBmp( &colt45_bmp[0] );
-	r_FreeBmp( &colt45_bmp[1] );
-	r_FreeBmp( &colt45_bmp[2] );
+	r_FreeBmp( &pistol_bmp[0] );
+	r_FreeBmp( &pistol_bmp[1] );
+	r_FreeBmp( &pistol_bmp[2] );
+	r_FreeBmp( &pistol_bmp[3] );
+	r_FreeBmp( &pistol_bmp[4] );
 	r_FreeBmp( &shotgun_bmp[0] );
 	r_FreeBmp( &shotgun_bmp[1] );
-	r_FreeBmp( &shotgun_bmp[2] );
-	r_FreeBmp( &shotgun_bmp[3] );
 	r_FreeBmp( &shotgun_bmp[4] );
-	r_FreeBmp( &shotgun_bmp[5] );
+	r_FreeBmp( &shotgun_bmp[6] );
 	
 	SDL_FreeSurface(screen);
 }

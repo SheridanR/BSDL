@@ -4,8 +4,8 @@
 	File: r_render.c
 	Desc: renders world data and draws it to the video surface.
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -26,8 +26,7 @@
 
 -------------------------------------------------------------------------------*/
 
-void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
-{
+void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) {
 	int posx, posy;
 	double fracx, fracy;
 	double cosang, sinang;
@@ -49,7 +48,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 	long top, bottom;
 	//long ltexsize;
 	double ftexsize;
-	//long screenindex;
+	int screenindex;
 	//long tomove;
 
 	Uint8 r, g, b;
@@ -71,8 +70,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 	ry = (sinang - cosang)*2.0;
 	d = 1.0/hz; cosang *= d; sinang *= d; ix=0; iy=0;
 
-	for( sx=0; sx<xres; sx++ ) // trace for every column of pixels on the screen
-	{
+	for( sx=0; sx<xres; sx++ ) { // trace for every column of pixels on the screen
 		inx=posx; iny=posy;
 		inx2=inx;
 		iny2=iny;
@@ -102,11 +100,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 		ftop2 = (hy-hei2*(map.ceilings[inx2+iny2*map.width]-oz))+hei2*(map.ceilings[inx2+iny2*map.width]-map.ceilings[inx+iny*map.width])+1;
 		ftop1 = 0;
 		ftop2 = min(max(ftop2,0),yres);
-		for( sy=ftop1; sy<ftop2; sy++ )
-		{
+		for( sy=ftop1; sy<ftop2; sy++ ) {
 			index=inx+iny*map.width;
-			if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] )
-			{
+			if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
 				floorbuffer[sy][sx][0] = map.ceilings[index];
 				floorbuffer[sy][sx][1] = map.ceilings_tex2[index];
 				rowbuffer[sy] = 1;
@@ -117,19 +113,16 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 		ftop2 = hy-hei2*(map.floors[inx+iny*map.width]-oz)-1;
 		ftop1 = yres-1;
 		ftop2 = min(max(ftop2,0),yres);
-		for( sy=ftop2; sy<ftop1; sy++ )
-		{
+		for( sy=ftop2; sy<ftop1; sy++ ) {
 			index=inx+iny*map.width;
-			if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] )
-			{
+			if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
 				floorbuffer[sy][sx][0] = map.floors[index];
 				floorbuffer[sy][sx][1] = map.floors_tex2[index];
 				rowbuffer[sy] = 1;
 			}
 		}
 		
-		while( d < 64 )
-		{
+		while( d < 64 ) {
 			if( map.floors[inx+iny*map.width] >= map.ceilings[inx+iny*map.width] ) break;
 			if( dval1>dval0 ) { inx+=dincx; d=dval0; dval0+=arx; side=0; }
 			else { iny+=dincy; d=dval1; dval1+=ary; side=1; }
@@ -157,37 +150,29 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 			///////////////////
 			
 			ttop = hy-hei*(lastheight2-oz); // top of the wall slice
-			if( lasttop2 < ttop || lasttop2 <= 0 )
-			{
+			if( lasttop2 < ttop || lasttop2 <= 0 ) {
 				tbottom = ttop+hei*(lastheight2-map.ceilings[inx+iny*map.width]); // bottom of the wall slice
 				
 				// determine ceiling heights per pixel
-				if( tbottom < hy )
-				{
+				if( tbottom < hy ) {
 					ftop2 = hy-hei2*((map.ceilings[inx2+iny2*map.width]-oz))+hei2*(map.ceilings[inx2+iny2*map.width]-map.ceilings[inx+iny*map.width]);
 					ftop1 = min(max(tbottom-1,0),yres);
 					ftop2 = min(max(ftop2,0),yres);
-					for( sy=ftop1; sy<ftop2; sy++ )
-					{
+					for( sy=ftop1; sy<ftop2; sy++ ) {
 						index=inx+iny*map.width;
-						if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] )
-						{
+						if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
 							floorbuffer[sy][sx][0] = map.ceilings[index];
 							floorbuffer[sy][sx][1] = map.ceilings_tex2[index];
 							rowbuffer[sy] = 1;
 						}
 					}
-				}
-				else
-				{
+				} else {
 					ftop2 = hy-hei2*((map.ceilings[inx2+iny2*map.width]-oz))+hei2*(map.ceilings[inx2+iny2*map.width]-map.ceilings[inx+iny*map.width]);
 					ftop1 = min(max(tbottom,0),yres);
 					ftop2 = min(max(ftop2,0),yres);
-					for( sy=ftop1; sy<ftop2; sy++ )
-					{
+					for( sy=ftop1; sy<ftop2; sy++ ) {
 						index=inx+iny*map.width;
-						if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] )
-						{
+						if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
 							floorbuffer[sy][sx][0] = map.ceilings[index];
 							floorbuffer[sy][sx][1] = map.ceilings_tex2[index];
 							rowbuffer[sy] = 1;
@@ -195,37 +180,30 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 					}
 				}
 				
-				if( tbottom > lasttop3 || lasttop3 >= yres )
-				{
+				if( tbottom > lasttop3 || lasttop3 >= yres ) {
 					top=lasttop3;
 					lasttop3=tbottom;
 					
-					if( tbottom < lastbottom2 )
-					{
+					if( tbottom < lastbottom2 ) {
 						if( lastbottom2 != 0 ) tbottom = lasttop2;
 						lastbottom2=tbottom;
 					}
 					if( ttop < lasttop2 ) lasttop2=ttop;
 					
-					if( map.ceilings_tex[inx+iny*map.width] >= 0 && map.ceilings_tex[inx+iny*map.width] < texture_num )
-					{
+					if( map.ceilings_tex[inx+iny*map.width] >= 0 && map.ceilings_tex[inx+iny*map.width] < texture_num ) {
 						walltex = &walltex_bmp[map.ceilings_tex[inx+iny*map.width]];
 						if( side ) tx = ix*32;
 						else tx = iy*32;
 						tx = tx &(walltex->width-1);
-						//tx *= walltex->width;
 						
 						// draw ceiling wall slice
 						s=pow(darkness,-d)/(side+1);
 						top=max(ttop,top);
 						bottom=min(tbottom,yres);
-						//screenindex = (sx<<2) + gdd.f;
+						screenindex = top*screen->pitch;
 						//tomove = walltex->height-1;
-						for( sy=top; sy<bottom; sy++ )
-						{
-							/*asm(".intel_syntax noprefix\n");
-							__asm
-							(
+						for( sy=top; sy<bottom; sy++ ) {
+							/*asm (
 								//ty = sy-ttop;
 								"mov eax, sy\n"
 								"sub eax, ttop\n"
@@ -241,45 +219,37 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 								"and	ty, eax\n"
 							);*/
 							
-							if( zbuffer[sy][sx] == 0 || zbuffer[sy][sx] > d ) // draw onto the screen and the zbuffer
-							{
+							if( zbuffer[sy][sx] == 0 || zbuffer[sy][sx] > d ) { // draw onto the screen and the zbuffer
 								ty = ((int)((sy-ttop)*ftexsize))&(walltex->height-1);
 								index = (tx+ty*walltex->width)<<2;
-								//r = walltex->r[index];
-								//g = walltex->g[index];
-								//b = walltex->b[index];
 								r = walltex->data[index];
 								g = walltex->data[index+1];
 								b = walltex->data[index+2];
 								
-								/*asm(".intel_syntax noprefix\n");
-								__asm
-								(
+								/*asm (
 									//shade the RED component
-									"fld	s\n"
-									"fimul r\n"
-									"fistp r\n"
+									"fld	s\n\t"
+									"fimul r\n\t"
+									"fistp r\n\t"
 									
 									//shade the GREEN component
-									"fld	s\n"
-									"fimul g\n"
-									"fistp g\n"
+									"fld	s\n\t"
+									"fimul g\n\t"
+									"fistp g\n\t"
 									
 									//shade the BLUE component
-									"fld	s\n"
-									"fimul b\n"
-									"fistp b\n"
+									"fld	s\n\t"
+									"fimul b\n\t"
+									"fistp b\n\t"
 								);*/
 								r *= s;
 								g *= s;
 								b *= s;
 								
-								//colors = rgb2color( r, g, b ); // get the colors
-								//*(long *)(gdd.p*sy+screenindex) = colors; // draw the pixel
-								//SDL_PutPixel( screen, sx, sy, SDL_MapRGB( screen->format, r, g, b ) );
-								*(Uint32 *)((Uint8 *)p + sy * screen->pitch)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
+								*(Uint32 *)((Uint8 *)p + screenindex)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 								zbuffer[sy][sx] = d; // modify the zbuffer
 							}
+							screenindex += screen->pitch;
 						}
 					}
 				}
@@ -298,32 +268,25 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 				ttop = tbottom;
 			
 			// determine floor heights per pixel
-			if( ttop > hy )
-			{
+			if( ttop > hy ) {
 				ftop2 = hy-hei2*(map.floors[inx+iny*map.width]-oz)-1;
 				ftop1 = min(max(ttop,0),yres);
 				ftop2 = min(max(ftop2,0),yres);
-				for( sy=ftop2; sy<ftop1; sy++ )
-				{
+				for( sy=ftop2; sy<ftop1; sy++ ) {
 					index=inx+iny*map.width;
-					if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] )
-					{
+					if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
 						floorbuffer[sy][sx][0] = map.floors[index];
 						floorbuffer[sy][sx][1] = map.floors_tex2[index];
 						rowbuffer[sy] = 1;
 					}
 				}
-			}
-			else
-			{
+			} else {
 				ftop2 = hy-hei2*(map.floors[inx+iny*map.width]-oz);
 				ftop1 = min(max(ttop,0),yres);
 				ftop2 = min(max(ftop2,0),yres);
-				for( sy=ftop2; sy<ftop1; sy++ )
-				{
+				for( sy=ftop2; sy<ftop1; sy++ ) {
 					index=inx+iny*map.width;
-					if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] )
-					{
+					if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
 						floorbuffer[sy][sx][0] = map.floors[index];
 						floorbuffer[sy][sx][1] = map.floors_tex2[index];
 						rowbuffer[sy] = 1;
@@ -331,8 +294,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 				}
 			}
 			
-			if( ttop < lastbottom3 || lastbottom3 <= 0 )
-			{
+			if( ttop < lastbottom3 || lastbottom3 <= 0 ) {
 				bottom=lastbottom3;
 				lastbottom3=ttop;
 				if( ttop > lasttop1 && lasttop1 != 0 ) ttop = lastbottom1;
@@ -340,14 +302,12 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 				//tbottom = ttop+hei*(map.floors[inx+iny*map.width]-lastheight1); // bottom of the wall slice
 				tbottom = hy-hei*(lastheight1-oz);
 				
-				if( tbottom < lastbottom1 )
-				{
+				if( tbottom < lastbottom1 ) {
 					if( lastbottom1 != 0 ) tbottom = lasttop1;
 					lastbottom1=tbottom;
 				}
 				
-				if( map.floors_tex[inx+iny*map.width] >= 0 && map.floors_tex[inx+iny*map.width] < texture_num )
-				{
+				if( map.floors_tex[inx+iny*map.width] >= 0 && map.floors_tex[inx+iny*map.width] < texture_num ) {
 					walltex = &walltex_bmp[map.floors_tex[inx+iny*map.width]];
 					if( side ) tx = ix*32;
 					else tx = iy*32;
@@ -357,9 +317,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 					s=pow(darkness,-d)/(side+1);
 					top=max(ttop,0);
 					bottom=min(tbottom,bottom);
+					screenindex=top*screen->pitch;
 					//tomove = walltex->height-1;
-					for( sy=top; sy<bottom; sy++ )
-					{
+					for( sy=top; sy<bottom; sy++ ) {
 						/*asm(".intel_syntax noprefix\n");
 						__asm
 						(
@@ -377,42 +337,43 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 							"mov	eax, tomove\n"
 							"and	ty, eax\n"
 						);*/
-						if( zbuffer[sy][sx] == 0 || zbuffer[sy][sx] > d ) // draw onto the screen and the zbuffer
-						{
+						if( zbuffer[sy][sx] == 0 || zbuffer[sy][sx] > d ) { // draw onto the screen and the zbuffer
 							ty = ((int)((sy-ttop)*ftexsize))&(walltex->height-1);
 							index = (tx+ty*walltex->width)<<2;
 							r = walltex->data[index];
 							g = walltex->data[index+1];
 							b = walltex->data[index+2];
 							
-							/*asm(".intel_syntax noprefix\n");
-							__asm
-							(
+							/*asm (
 								//shade the RED component
-								"fld	s\n"
-								"fimul r\n"
-								"fistp r\n"
+								"fld	_s\n\t"
+								"fimul r\n\t"
+								"fistp r\n\t"
 								
 								//shade the GREEN component
-								"fld	s\n"
-								"fimul g\n"
-								"fistp g\n"
+								"fld	s\n\t"
+								"fimul g\n\t"
+								"fistp g\n\t"
 								
 								//shade the BLUE component
-								"fld	s\n"
-								"fimul b\n"
-								"fistp b\n"
+								"fld	s\n\t"
+								"fimul b\n\t"
+								"fistp b"
 							);*/
+							/*asm ("fld %1\n\t"
+								"fimul %0\n\t"
+								"fistp %0"
+								: "=p" (r)
+								: "p" (r), "m" (s)
+								: "0");*/
 							r *= s;
 							g *= s;
 							b *= s;
 							
-							//colors = rgb2color( r, g, b ); // get the colors
-							//*(long *)(gdd.p*sy+screenindex) = colors; // draw the pixel
-							//SDL_PutPixel( screen, sx, sy, SDL_MapRGB( screen->format, r, g, b ) );
-							*(Uint32 *)((Uint8 *)p + sy * screen->pitch)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
+							*(Uint32 *)((Uint8 *)p + screenindex)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 							zbuffer[sy][sx] = d; // modify the zbuffer
 						}
+						screenindex += screen->pitch;
 					}
 				}
 			}
@@ -431,13 +392,12 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle )
 
 	r_DrawFloors
 
-	Draws floors in the level. Must be called after drawcolumns, which
-	generates distance data for each cell.
+	Draws floor and ceiling spans in the level. Must be called after
+	r_DrawColumns, which generates distance data for each section.
 
 -------------------------------------------------------------------------------*/
 
-void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
-{
+void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 	float d;
 	float invRes;
 	float parallel;
@@ -456,7 +416,7 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 	long index;
 	int x, y;
 	long tex;
-	//long screenindex;
+	//int screenindex;
 	Uint8 r, g, b;
 	Uint8 *p;
 
@@ -478,8 +438,7 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 	/*  CEILING DRAWING  */
 	/*                   */
 
-	for(y = 0; y < horizon2; y++)
-	{
+	for(y = 0; y < horizon2; y++) {
 		if( !rowbuffer[y]) continue; // skip this row, it doesn't need to be drawn
 		currentfloor = floorbuffer[y][0][0];
 		d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.925;
@@ -507,16 +466,12 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 		//screenindex = (gdd.p*y) + gdd.f;
 		p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the row we are drawing in
 		
-		for(x = 0; x < xres; x++)
-		{
-			if( floorbuffer[y][x][0] != 16383 )
-			{
-				if( floorbuffer[y][x][0] != currentfloor || oz-currentfloor>0 )
-				{
+		for(x = 0; x < xres; x++) {
+			if( floorbuffer[y][x][0] != 16383 ) {
+				if( floorbuffer[y][x][0] != currentfloor || oz-currentfloor>0 ) {
 					currentfloor = floorbuffer[y][x][0];
 					d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.925;
-					if( oz-currentfloor>0 )
-					{
+					if( oz-currentfloor>0 ) {
 						tU += dU;
 						tV += dV;
 						continue;
@@ -543,14 +498,12 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 					d *= .011;
 					s = pow(darkness,-d)/2;
 				}
-				if( d < zbuffer[ y ][ x ] || !zbuffer[ y ][ x ] )
-				{
+				if( d < zbuffer[ y ][ x ] || !zbuffer[ y ][ x ] ) {
 					//flrx=min(max( ((unsigned long)tU)>>5, 0),map.width-1);
 					//flry=min(max( ((unsigned long)tV)>>5, 0),map.height-1);
 					//tex = map.ceilings_tex2[flrx+flry*map.width];
 					tex = floorbuffer[y][x][1];
-					if( tex >= 0 && tex < texture_num )
-					{
+					if( tex >= 0 && tex < texture_num ) {
 						index = ((((unsigned long)tV&(walltex_bmp[tex].height-1))*walltex_bmp[tex].width)+((unsigned long)tU&(walltex_bmp[tex].width-1)))<<2;
 						
 						r = walltex_bmp[tex].data[index];
@@ -578,16 +531,14 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 						g *= s;
 						b *= s;
 						
-						//colors = rgb2color( r, g, b );
-						//*(long *)(screenindex+(x<<2)) = colors;
-						//SDL_PutPixel( screen, x, y, SDL_MapRGB( screen->format, r, g, b ) );
-						*(Uint32 *)((Uint8 *)p + x * screen->format->BytesPerPixel)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
+						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						zbuffer[ y ][ x ] = d;
 					}
 				}
 			}
 			tU += dU;
 			tV += dV;
+			p+=screen->format->BytesPerPixel;
 		}
 	}
 	
@@ -595,8 +546,7 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 	/*  FLOOR DRAWING  */
 	/*                 */
 	
-	for(y = horizon2; y < yres; y++)
-	{
+	for(y = horizon2; y < yres; y++) {
 		if( !rowbuffer[y] ) continue; // skip this row, it doesn't need to be drawn
 		currentfloor = floorbuffer[y][0][0];
 		d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.825;
@@ -624,16 +574,12 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 		//screenindex = (gdd.p*y) + gdd.f;
 		p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the row we are drawing in
 		
-		for(x = 0; x < xres; x++)
-		{
-			if( floorbuffer[y][x][0] != 16383 )
-			{
-				if( floorbuffer[y][x][0] != currentfloor || oz-currentfloor<0 )
-				{
+		for(x = 0; x < xres; x++) {
+			if( floorbuffer[y][x][0] != 16383 ) {
+				if( floorbuffer[y][x][0] != currentfloor || oz-currentfloor<0 ) {
 					currentfloor = floorbuffer[y][x][0];
 					d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.825;
-					if( oz-currentfloor<0 )
-					{
+					if( oz-currentfloor<0 ) {
 						tU += dU;
 						tV += dV;
 						continue;
@@ -660,22 +606,18 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 					d *= .011;
 					s = pow(darkness,-d);
 				}
-				if( d < zbuffer[ y ][ x ] || !zbuffer[ y ][ x ] )
-				{
+				if( d < zbuffer[ y ][ x ] || !zbuffer[ y ][ x ] ) {
 					//flrx=min(max( ((unsigned long)tU)>>5, 0),map.width-1);
 					//flry=min(max( ((unsigned long)tV)>>5, 0),map.height-1);
 					//tex = map.floors_tex2[flrx+flry*map.width];
 					tex = floorbuffer[y][x][1];
-					if( tex >= 0 && tex < texture_num )
-					{
+					if( tex >= 0 && tex < texture_num ) {
 						index = ((((unsigned long)tV&(walltex_bmp[tex].height-1))*walltex_bmp[tex].width)+((unsigned long)tU&(walltex_bmp[tex].width-1)))<<2;
 						
 						r = walltex_bmp[tex].data[index];
 						g = walltex_bmp[tex].data[index+1];
 						b = walltex_bmp[tex].data[index+2];
-						/*asm(".intel_syntax noprefix\n");
-						__asm
-						(
+						/*asm (
 							//shade the RED component
 							"fld	s\n"
 							"fimul r\n"
@@ -695,16 +637,14 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 						g *= s;
 						b *= s;
 						
-						//colors = rgb2color( r, g, b );
-						//*(long *)(screenindex+(x<<2)) = colors;
-						//SDL_PutPixel( screen, x, y, SDL_MapRGB( screen->format, r, g, b ) );
-						*(Uint32 *)((Uint8 *)p + x * screen->format->BytesPerPixel)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
+						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						zbuffer[ y ][ x ] = d;
 					}
 				}
 			}
 			tU += dU;
 			tV += dV;
+			p += screen->format->BytesPerPixel;
 		}
 	}
 }
@@ -713,13 +653,11 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle )
 
 	r_DrawSprites
 
-	Draws all sprites in the level. Must be called after draw_columns,
-	which determines which sprites need be drawn and which don't.
+	Draws all entities in the level.
 
 -------------------------------------------------------------------------------*/
 
-void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle )
-{
+void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle ) {
 	float d, dx, dy; // distance variables
 	long sx, sy; // screen position variables
 	float ax, ay; // angular variables
@@ -732,7 +670,7 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle )
 	int x3, x4, y3, y4;
 	int picx, picy;
 	long index;
-	//long screenindex;
+	int screenindex;
 	int width, height, size;
 	float s, sizefactor;
 	Uint8 r, g, b;
@@ -747,8 +685,7 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle )
 	sinang = sin( angle );
 	hx = xres>>1; hy = (yres>>1)+vangle; hz = hx;
 
-	for( sprites=firstentity; sprites!=NULL; sprites=sprites->next)
-	{
+	for( sprites=firstentity; sprites!=NULL; sprites=sprites->next) {
 		// if the entity has no texture, skip to the next one.
 		if( sprites->texture == NULL )
 			continue;
@@ -786,19 +723,14 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle )
 		x4=min(x2,xres);
 		y3=max(y1,0);
 		y4=min(y2,yres);
-		for( y=y3; y<y4; y++ )
-		{
-			//screenindex = (gdd.p*y) + gdd.f;
+		for( y=y3; y<y4; y++ ) {
 			p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the row we are drawing in
 			picy = (y-y1)*sizefactor;
-			for( x=x3; x<x4; x++ )
-			{
-				if( zbuffer[y][x] >= d || !zbuffer[y][x] )
-				{
+			screenindex=x3*screen->format->BytesPerPixel;
+			for( x=x3; x<x4; x++ ) {
+				if( zbuffer[y][x] >= d || !zbuffer[y][x] ) {
 					picx = (x-x1)*sizefactor;
-					//asm(".intel_syntax noprefix\n");
-					/*__asm
-					(
+					/*asm (
 					"fld	$0,$d\n"
 					"fimul $0,$picx\n"
 					"fdiv  $0,$sprsize\n"
@@ -816,22 +748,17 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle )
 					);*/
 					index = picx+picy*width;
 					
-					if( index >= 0 && index < size )
-					{
+					if( index >= 0 && index < size ) {
 						index *= 4;
 						r = sprites->texture->data[index];
 						g = sprites->texture->data[index+1];
 						b = sprites->texture->data[index+2];
-						if( r || g<255 || b<255 )
-						{
+						if( r || g<255 || b<255 ) {
 							//*(long *)(screenindex+(x<<2)) = colors;
 							r *= s;
 							g *= s;
 							b *= s;
-							/*asm
-							(
-								".intel_syntax noprefix\n"
-							
+							/*asm (
 								//shade the RED component
 								"fld	s\n"
 								"fimul r\n"
@@ -846,15 +773,14 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle )
 								"fld	s\n"
 								"fimul b\n"
 								"fistp b\n"
-								
-								".att_syntax noprefix\n"
 							);*/
 							zbuffer[y][x] = d;
 							//SDL_PutPixel( screen, x, y, SDL_MapRGB( screen->format, r, g, b ) );
-							*(Uint32 *)((Uint8 *)p + x * screen->format->BytesPerPixel)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
+							*(Uint32 *)((Uint8 *)p + screenindex)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						}
 					}
 				}
+				screenindex+=screen->format->BytesPerPixel;
 			}
 		}
 	}

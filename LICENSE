@@ -1,0 +1,11 @@
+----- LICENSE -----
+
+Bubbenstein/SDL (BSDL) is copyright (c) 2013 Sheridan Kane Rathbun, all rights reserved.
+
+As someone who has downloaded this program, you are free to run, modify, and distribute it as you please. The only stipulation is that you charge no money for its redistribution or claim to be its original author.
+
+The resources used by this game engine (namely, the image files) were either designed by me or collected from a variety of free libraries. Many files come from the Freedoom project.
+
+I encourage other programmers to dig into the source code supplied with the engine. I am happy to help any aspiring programmers out there to get a feel for how engines like this tick.
+
+BSDL makes use of the SDL library and the supplementary SPriG library by John Dearborn.

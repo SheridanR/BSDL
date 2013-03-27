@@ -4,8 +4,8 @@
 	File: g_main.c
 	Desc: main game source file. initializes engine and starts game.
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -26,8 +26,7 @@
 
 -------------------------------------------------------------------------------*/
 
-int main( int argc, char **argv )
-{
+int main( int argc, char **argv ) {
 	SDL_Rect src, dest;
 	src.x=1; dest.x=0;
 	src.y=1; dest.y=0;
@@ -43,8 +42,7 @@ int main( int argc, char **argv )
 	else
 		g_Open("testmap.bsm");
 	
-	while(gameloop)
-	{
+	while(gameloop) {
 		// run game loop functions
 		i_GetFrameRate();
 		i_ReceiveInput();
@@ -59,8 +57,7 @@ int main( int argc, char **argv )
 		r_DrawWeapons();
 		
 		// interface
-		if( message_time > 0 )
-		{
+		if( message_time > 0 ) {
 			i_PrintText( font16_bmp, 4, 4, "%s", message_str );
 			message_time -= timesync;
 		}

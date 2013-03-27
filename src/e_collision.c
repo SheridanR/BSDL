@@ -4,8 +4,8 @@
 	File: e_collision.c
 	Desc: handles entity collision detection against the world
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -26,33 +26,25 @@
 
 -------------------------------------------------------------------------------*/
 
-int e_CheckCells( double tx, double ty, int tz, entity_t* me )
-{
+int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
 	double sx, sy;
 	float ffx, ffy;
 	long fx, fy;
 	long fh, ch;
 	entity_t* entity;
 
-	for( sy=-me->sizey; sy<=me->sizey; sy+=me->sizey )
-	{
-		for( sx=-me->sizex; sx<=me->sizex; sx+=me->sizex )
-		{
+	for( sy=-me->sizey; sy<=me->sizey; sy+=me->sizey ) {
+		for( sx=-me->sizex; sx<=me->sizex; sx+=me->sizex ) {
 			fx = floor(tx+sx); fy = floor(ty+sy); // int coordinates
 			ffx = tx+sx; ffy = ty+sy; // float coordinates
 			
 			fh = map.floors[fx+fy*map.width] + (me->sizez*.5) - 1; // get the initial floor/ceiling heights
 			ch = map.ceilings[fx+fy*map.width] - (me->sizez*.5) - 1;
-			if( firstentity != NULL ) // check against entities
-			{
-				for( entity=firstentity; entity!=NULL; entity=entity->next )
-				{
-					if( !(entity->flags&FLAG_PASSABLE) && entity != me ) // if the entity is neither passable nor myself
-					{
-						if( ffx >= entity->x-entity->sizex && ffx <= entity->x+entity->sizex ) // if this horizontal position intersects with the entity
-						{
-							if( ffy >= entity->y-entity->sizey && ffy <= entity->y+entity->sizey ) // if this vertical position intersects with the entity
-							{
+			if( firstentity != NULL ) { // check against entities
+				for( entity=firstentity; entity!=NULL; entity=entity->next ) {
+					if( !(entity->flags&FLAG_PASSABLE) && entity != me ) { // if the entity is neither passable nor myself
+						if( ffx >= entity->x-entity->sizex && ffx <= entity->x+entity->sizex ) { // if this horizontal position intersects with the entity
+							if( ffy >= entity->y-entity->sizey && ffy <= entity->y+entity->sizey ) { // if this vertical position intersects with the entity
 								if( me->z+me->sizez > entity->z+entity->sizez && fh < entity->z+entity->sizez )
 									fh=entity->z+entity->sizez; // adjust the floor height to include me!
 								if( me->z-me->sizez < entity->z-entity->sizez && ch > entity->z-entity->sizez )
@@ -87,8 +79,7 @@ int e_CheckCells( double tx, double ty, int tz, entity_t* me )
 
 -------------------------------------------------------------------------------*/
 
-int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double vz, entity_t* me )
-{
+int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double vz, entity_t* me ) {
 	double tx, ty; int tz;
 	long fx, fy;
 	//long fh, ch;
@@ -111,31 +102,24 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 	ty=*y+vy;
 	tz=*z;
 	tz=max(tz,map.floors[fx+fy*map.width]);
-	if( !e_CheckCells(tx,ty,tz,me) )
-	{
+	if( !e_CheckCells(tx,ty,tz,me) ) {
 		*x=tx;
 		*y=ty;
 		exitcode=0;
-	}
-	else
-	{
+	} else {
 		tx=*x+vx;
 		ty=*y;
 		tz=*z;
 		tz=max(tz,map.floors[fx+fy*map.width]);
-		if( !e_CheckCells(tx,ty,tz,me) )
-		{
+		if( !e_CheckCells(tx,ty,tz,me) ) {
 			*x=tx;
 			*y=ty;
-		}
-		else
-		{
+		} else {
 			tx=*x;
 			ty=*y+vy;
 			tz=*z;
 			tz=max(tz,map.floors[fx+fy*map.width]);
-			if( !e_CheckCells(tx,ty,tz,me) )
-			{
+			if( !e_CheckCells(tx,ty,tz,me) ) {
 				*x=tx;
 				*y=ty;
 			}
@@ -149,19 +133,13 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 	//ch = map.ceilings[fx+fy*map.width];
 
 	*z=min(max((tz+vz),gfh-me->sizez),gch);
-	if(*z <= gfh) // on ground?
-	{
-		if( !me->onground2 ) // landing from a fall?
-		{
+	if(*z <= gfh) { // on ground?
+		if( !me->onground2 ) { // landing from a fall?
 			*z=gfh;
 			me->onground2=1;
-		}
-		else
-		{
-			if(*z < gfh) // climbing a step?
-			{
-				if( stepclimb || gfh-sfh < STEPHEI )
-				{
+		} else {
+			if(*z < gfh) { // climbing a step?
+				if( stepclimb || gfh-sfh < STEPHEI ) {
 					*z += timesync*.3;
 					if(*z>gfh) *z=gfh;
 				}
@@ -169,9 +147,7 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 		}
 	}
 	if(*z > gfh) // above ground?
-	{
 		me->onground=0;
-	}
 
 	return(exitcode);
 }
@@ -186,8 +162,7 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 
 -------------------------------------------------------------------------------*/
 
-void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2, entity_t* me )
-{
+void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2, entity_t* me ) {
 	double tracex, tracey, tracex2, tracey2;
 	int tracez, tracez2;
 	double dx, dy, dxabs, dyabs, x, y;
@@ -208,48 +183,38 @@ void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2,
 	tracey2=y2;
 	tracez2=z2-tracez;
 	
-	if( e_ClipVelocity(&tracex,&tracey,&tracez,min(1,tracex2-tracex),min(1,tracey2-tracey),tracez2,me) )
-	{
+	if( e_ClipVelocity(&tracex,&tracey,&tracez,min(1,tracex2-tracex),min(1,tracey2-tracey),tracez2,me) ) {
 		*x1 = tracex;
 		*y1 = tracey;
 		*z1 = tracez;
 		return;
 	}
-	if( dxabs >= dyabs ) // the line is more horizontal than vertical
-	{
-		for( i=0; i<dxabs; i++ )
-		{
+	if( dxabs >= dyabs ) { // the line is more horizontal than vertical
+		for( i=0; i<dxabs; i++ ) {
 			y+=dyabs;
-			if( y >= dxabs )
-			{
+			if( y >= dxabs ) {
 				y -= dxabs;
 				tracey += sdy;
 			}
 			tracex += sdx;
 			
-			if( e_ClipVelocity(&tracex,&tracey,&tracez,min(1,tracex2-tracex),min(1,tracey2-tracey),tracez2,me) )
-			{
+			if( e_ClipVelocity(&tracex,&tracey,&tracez,min(1,tracex2-tracex),min(1,tracey2-tracey),tracez2,me) ) {
 				*x1 = tracex;
 				*y1 = tracey;
 				*z1 = tracez;
 				return;
 			}
 		}
-	}
-	else // the line is more vertical than horizontal
-	{
-		for( i=0; i<dyabs; i++ )
-		{
+	} else { // the line is more vertical than horizontal
+		for( i=0; i<dyabs; i++ ) {
 			x += dxabs;
-			if( x >= dyabs )
-			{
+			if( x >= dyabs ) {
 				x -= dyabs;
 				tracex += sdx;
 			}
 			tracey += sdy;
 			
-			if( e_ClipVelocity(&tracex,&tracey,&tracez,min(1,tracex2-tracex),min(1,tracey2-tracey),tracez2,me) )
-			{
+			if( e_ClipVelocity(&tracex,&tracey,&tracez,min(1,tracex2-tracex),min(1,tracey2-tracey),tracez2,me) ) {
 				*x1 = tracex;
 				*y1 = tracey;
 				*z1 = tracez;
@@ -262,7 +227,6 @@ void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2,
 	*z1 = tracez;
 }
 
-void e_LineTrace( double x1, double y1, int z1, double angle, double vangle )
-{
-	
+void e_LineTrace( double x1, double y1, int z1, double angle, double vangle ) {
+	// empty implementation
 }

@@ -4,8 +4,8 @@
 	File: e_behaviors.c
 	Desc: contains various entity behaviors
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -26,12 +26,10 @@
 
 -------------------------------------------------------------------------------*/
 
-void e_Cycle()
-{
+void e_Cycle() {
 	entity_t *handle;
 	
-	for( handle=firstentity; handle!=NULL; handle=handle->next)
-	{
+	for( handle=firstentity; handle!=NULL; handle=handle->next) {
 		if( handle->behavior != NULL )
 			(*handle->behavior)(handle); // execute the entity's behavior function
 	}
@@ -45,8 +43,7 @@ void e_Cycle()
 
 -------------------------------------------------------------------------------*/
 
-void e_ActChar(entity_t *handle)
-{
+void e_ActChar(entity_t *handle) {
 	double opx, opy;
 	int opz;
 	int frame;
@@ -55,8 +52,7 @@ void e_ActChar(entity_t *handle)
 	
 	// count to ten, choose a destination.
 	handle->fskill[4] -= timesync;
-	if( handle->fskill[4] <= 0 )
-	{
+	if( handle->fskill[4] <= 0 ) {
 		handle->fskill[4] = 3000;
 		handle->fskill[5] = min(max(handle->x,8),map.width-8)-8+(rand()%16)+1;
 		handle->fskill[6] = min(max(handle->y,8),map.height-8)-8+(rand()%16)+1;
@@ -124,8 +120,7 @@ void e_ActChar(entity_t *handle)
 
 -------------------------------------------------------------------------------*/
 
-void e_ActPlayer(entity_t *handle)
-{
+void e_ActPlayer(entity_t *handle) {
 	double f, s, v, turn, look;
 	double co, si;
 	int fly = 0;
@@ -135,8 +130,7 @@ void e_ActPlayer(entity_t *handle)
 	int frame;
 	float dir;
 	
-	if( keystatus[SDLK_k] )
-	{
+	if( keystatus[SDLK_k] ) {
 		keystatus[SDLK_k] = 0;
 		i_Message( "X=%d Y=%d Z=%d\nAng=%f", (int)floor(handle->x), (int)floor(handle->y), handle->z, handle->ang );
 	}
@@ -152,15 +146,12 @@ void e_ActPlayer(entity_t *handle)
 	vx += (co*f - si*s)*timesync*.000125;
 	vy += (si*f + co*s)*timesync*.000125;
 	if( fly ) vz = v*timesync/12;
-	else
-	{
+	else {
 		if( !handle->onground ) vz += (-1)+min(1-.006*timesync,1);
-		else
-		{
+		else {
 			if( !keystatus[SDLK_SPACE] )
 				vz = 0;
-			else
-			{
+			else {
 				vz = .5;
 				handle->onground = 0;
 			}
@@ -171,8 +162,7 @@ void e_ActPlayer(entity_t *handle)
 	f = max(1-.01*timesync,0);
 	vx*=f; vy*=f; va*=f*.25; la*=f*.25;
 	
-	if( keystatus[SDLK_i] ) // insert a sprite
-	{
+	if( keystatus[SDLK_i] ) { // insert a sprite
 		keystatus[SDLK_i] = 0;
 		e_CreateEntity();
 		lastentity->behavior = &e_ActChar;
@@ -192,14 +182,11 @@ void e_ActPlayer(entity_t *handle)
 	handle->fskill[0] = handle->x;
 	handle->fskill[1] = handle->y;
 	
-	if( keystatus[SDLK_n] ) // noclip cheat
-	{
+	if( keystatus[SDLK_n] ) { // noclip cheat
 		handle->x += vx*timesync;
 		handle->y += vy*timesync;
 		handle->z += vz*timesync;
-	}
-	else
-	{
+	} else {
 		opx=handle->x+vx*timesync;
 		opy=handle->y+vy*timesync;
 		opz=handle->z+vz*timesync;
@@ -208,31 +195,25 @@ void e_ActPlayer(entity_t *handle)
 		handle->y = min(max(handle->y,.36),map.height-.36);
 	}
 	
-	if( handle->onground )
-	{
-		if( keystatus[SDLK_w] || keystatus[SDLK_s] || keystatus[SDLK_a] || keystatus[SDLK_d] )
-		{
+	if( handle->onground ) {
+		if( keystatus[SDLK_w] || keystatus[SDLK_s] || keystatus[SDLK_a] || keystatus[SDLK_d] ) {
 			bob1 += bob3*timesync/48;
+			bob1 *= f;
 			bob2 += bob1*timesync/12;
 			if( bob2 >= 3 && bob3 == 1 ) bob3 = -1;
-			if( bob2 <= -3 && bob3 == -1 )
-			{
+			if( bob2 <= -3 && bob3 == -1 ) {
 				bob1 = 0;
 				bob2 = -3;
 				bob3 = 1;
 			}
-		}
-		else
-		{
+		} else {
 			bob1 = 0;
 			bob3 = 1;
-			if( bob2 > 0 )
-			{
+			if( bob2 > 0 ) {
 				bob2 -= timesync/12;
 				if( bob2 < 0 ) bob2 = 0;
 			}
-			if( bob2 < 0 )
-			{
+			if( bob2 < 0 ) {
 				bob2 += timesync/12;
 				if( bob2 > 0 ) bob2 = 0;
 			}
@@ -251,42 +232,41 @@ void e_ActPlayer(entity_t *handle)
 	
 	// movement code ends
 	
-	if( darkness < 1.1 )
-	{
+	if( darkness < 1.1 ) {
 		darkness += timesync/1024;
 		if( darkness > 1.1 ) darkness = 1.1;
 	}
-	if( weap_anim == 0 && weap_swap[2] == 0 )
-	{
+	if( weap_swap[2] == 0 ) {
 		// fire the weapon
-		if( mousestatus[SDL_BUTTON_LEFT] && weap_skill[2] <= 0 )
-		{
+		if( mousestatus[SDL_BUTTON_LEFT] && weap_skill[2] <= 0 && !(handle->flags&FLAG_UNUSED1) ) {
 			darkness = 1.02;
 			weap_anim = 1;
+			handle->flags |= FLAG_UNUSED1;
 		}
-		// number keys to change weapons
-		if( keystatus[SDLK_2] && selected_weapon != 2 )
-			weap_swap[2] = 2;
-		else if( keystatus[SDLK_3] && selected_weapon != 3 )
-			weap_swap[2] = 3;
+		
+		// refire is available
+		if( !mousestatus[SDL_BUTTON_LEFT] )
+			handle->flags &= ~(FLAG_UNUSED1);
+		
+		if( weap_anim == 0 ) {
+			// number keys to change weapons
+			if( keystatus[SDLK_2] && selected_weapon != 2 )
+				weap_swap[2] = 2;
+			else if( keystatus[SDLK_3] && selected_weapon != 3 )
+				weap_swap[2] = 3;
+		}
 	}
-	if( weap_swap[2] ) // swapping weapons
-	{
-		if( !weap_swap[1] )
-		{
+	if( weap_swap[2] ) { // swapping weapons
+		if( !weap_swap[1] ) {
 			weap_swap[0] += timesync;
-			if( weap_swap[0] >= 224 )
-			{
-				weap_swap[0] = 224;
+			if( weap_swap[0] >= 128 ) {
+				weap_swap[0] = 128;
 				weap_swap[1] = 1;
 				selected_weapon = weap_swap[2];
 			}
-		}
-		else
-		{
+		} else {
 			weap_swap[0] -= timesync;
-			if( weap_swap[0] < 0 )
-			{
+			if( weap_swap[0] < 0 ) {
 				weap_swap[0] = 0;
 				weap_swap[1] = 0;
 				weap_swap[2] = 0;
@@ -294,32 +274,25 @@ void e_ActPlayer(entity_t *handle)
 		}
 	}
 	if( weap_skill[2] > 0 ) weap_skill[2] -= timesync;
-	if( weap_anim ) // firing weapons
-	{
-		if( selected_weapon == 2 )
-		{
-			weap_skill[2] = 60;
+	if( weap_anim ) { // firing weapons
+		if( selected_weapon == 2 ) {
+			weap_skill[2] = 10;
 			weap_skill[0] += timesync;
-			if( weap_skill[0] > 60 )
-			{
+			if( weap_skill[0] > 30 ) {
 				weap_skill[0] = 0;
 				weap_anim++;
-				if( weap_anim > 2 )
-				{
+				if( weap_anim > 4 ) {
 					weap_anim = 0;
 				}
 			}
 		}
-		if( selected_weapon == 3 )
-		{
+		if( selected_weapon == 3 ) {
 			weap_skill[2] = 60;
 			weap_skill[0] += timesync;
-			if( weap_skill[0] > 80 )
-			{
+			if( weap_skill[0] > 30 ) {
 				weap_skill[0] = 0;
 				weap_anim++;
-				if( weap_anim > 5 )
-				{
+				if( weap_anim > 8 ) {
 					weap_anim = 0;
 				}
 			}
@@ -340,8 +313,7 @@ void e_ActPlayer(entity_t *handle)
 	handle->texture = &sprite_bmp[frame];
 	
 	// move the camera!
-	if( !keystatus[SDLK_p] )
-	{
+	if( !keystatus[SDLK_p] ) {
 		camx = handle->x;
 		camy = handle->y;
 		camz = handle->z+bob2+22;

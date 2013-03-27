@@ -13,8 +13,7 @@
 #include "sprig.h"
 
 // game world structure
-typedef struct map_t
-{
+typedef struct map_t {
 	int loaded;      // lets the engine know whether or not there's data to be freed on shutdown.
 	char name[32];   // name of the map
 	char author[32]; // author of the map
@@ -33,15 +32,13 @@ typedef struct map_t
 #define MAPVERSION 1
 
 // bitmap structure
-typedef struct bitmap_t
-{
+typedef struct bitmap_t {
 	unsigned long width, height; // size of the image
 	char *data;                  // 24bit image data in RGB
 } bitmap_t;
 
 // entity structure
-typedef struct entity_t
-{
+typedef struct entity_t {
 	// VARS
 	double x, y; int z;              // world coordinates
 	double ang;                      // entity angle
@@ -69,12 +66,12 @@ extern entity_t *lastentity;  // last entity in list
 // entity flag definitions
 #define FLAG_PASSABLE 1
 #define FLAG_HIDDEN 2
-#define FLAG_BRIGHT 3
-#define FLAG_LIVING 4
-#define FLAG_KILLABLE 5
-#define FLAG_GRAVITY 6
-#define FLAG_UNUSED1 7
-#define FLAG_UNUSED2 8
+#define FLAG_BRIGHT 4
+#define FLAG_LIVING 8
+#define FLAG_KILLABLE 16
+#define FLAG_GRAVITY 32
+#define FLAG_UNUSED1 64
+#define FLAG_UNUSED2 128
 
 //#define PI 3.1415926536
 
@@ -163,8 +160,8 @@ extern unsigned int sprite_num;
 extern bitmap_t *sprite_bmp;
 
 // weapon textures
-extern bitmap_t colt45_bmp[3];
-extern bitmap_t shotgun_bmp[6];
+extern bitmap_t pistol_bmp[5];
+extern bitmap_t shotgun_bmp[9];
 
 // entity functions
 extern void e_Cycle();

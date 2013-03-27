@@ -4,8 +4,8 @@
 	File: i_draw.c
 	Desc: interface drawing functions
 
-	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	Copyright 2013 (c) Sheridan Rathbun, all rights reserved.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
@@ -26,8 +26,7 @@
 
 -------------------------------------------------------------------------------*/
 
-void i_PrintText( SDL_Surface *font_bmp, int x, int y, char *fmt, ... )
-{
+void i_PrintText( SDL_Surface *font_bmp, int x, int y, char *fmt, ... ) {
 	int c;
 	int numbytes;
 	char str[100];
@@ -37,11 +36,6 @@ void i_PrintText( SDL_Surface *font_bmp, int x, int y, char *fmt, ... )
 	// format the string
 	va_start( argptr, fmt );
 	numbytes = vsprintf( str, fmt, argptr );
-	//for( c=0; str[c] != '\0'; c++ )
-	//{
-	//	if( str[c] > 96 && str[c] < 123 )
-	//		str[c] -= 32;
-	//}
 	
 	// define font dimensions
 	dest.x = x;
@@ -50,13 +44,11 @@ void i_PrintText( SDL_Surface *font_bmp, int x, int y, char *fmt, ... )
 	dest.h = font_bmp->h/16; src.h = font_bmp->h/16;
 	
 	// print the characters in the string
-	for( c=0; c<numbytes; c++ )
-	{
+	for( c=0; c<numbytes; c++ ) {
 		src.x = (str[c]*src.w)%font_bmp->w;
 		src.y = floor((str[c]*src.w)/font_bmp->w)*src.h;
 		SDL_BlitSurface( font_bmp, &src, screen, &dest );
-		switch( str[c] )
-		{
+		switch( str[c] ) {
 			case 10: // line feed
 				dest.x = x;
 				dest.y += src.h;
