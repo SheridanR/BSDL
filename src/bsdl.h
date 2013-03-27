@@ -194,3 +194,4 @@ extern void r_DrawSky( double angle, double vangle );
 extern void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle );
 extern void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle );
 extern void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle );
+extern SDL_Surface* r_ScaleSurface(SDL_Surface *Surface, Uint16 Width, Uint16 Height);

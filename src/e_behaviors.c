@@ -27,11 +27,11 @@
 -------------------------------------------------------------------------------*/
 
 void e_Cycle() {
-	entity_t *handle;
+	entity_t *entity;
 	
-	for( handle=firstentity; handle!=NULL; handle=handle->next) {
-		if( handle->behavior != NULL )
-			(*handle->behavior)(handle); // execute the entity's behavior function
+	for( entity=firstentity; entity!=NULL; entity=entity->next) {
+		if( entity->behavior != NULL )
+			(*entity->behavior)(entity); // execute the entity's behavior function
 	}
 }
 
@@ -43,73 +43,95 @@ void e_Cycle() {
 
 -------------------------------------------------------------------------------*/
 
-void e_ActChar(entity_t *handle) {
+#define CHAR_HEALTH skill[0]
+#define CHAR_ANIM skill[1]
+#define CHAR_OLDX fskill[0]
+#define CHAR_OLDY fskill[1]
+#define CHAR_DISTANCE fskill[2]
+#define CHAR_VELOCITY fskill[3]
+#define CHAR_MOVEDELAY fskill[4]
+#define CHAR_DESTX fskill[5]
+#define CHAR_DESTY fskill[6]
+#define CHAR_FALL fskill[7]
+
+void e_ActChar(entity_t *my) {
 	double opx, opy;
 	int opz;
 	int frame;
 	float dir;
-	float speed;
+	float speed = 0;
 	
-	// count to ten, choose a destination.
-	handle->fskill[4] -= timesync;
-	if( handle->fskill[4] <= 0 ) {
-		handle->fskill[4] = 3000;
-		handle->fskill[5] = min(max(handle->x,8),map.width-8)-8+(rand()%16)+1;
-		handle->fskill[6] = min(max(handle->y,8),map.height-8)-8+(rand()%16)+1;
+	if(my->CHAR_HEALTH > 0) {
+		// count to ten, choose a destination.
+		my->CHAR_MOVEDELAY -= timesync;
+		if( my->CHAR_MOVEDELAY <= 0 ) {
+			my->CHAR_MOVEDELAY = 3000;
+			my->CHAR_DESTX = min(max(my->x,8),map.width-8)-8+(rand()%16)+1;
+			my->CHAR_DESTY = min(max(my->y,8),map.height-8)-8+(rand()%16)+1;
+		}
+		
+		// rotate the actor
+		dir = my->ang - atan2( my->CHAR_DESTY-my->y, my->CHAR_DESTX-my->x );
+		while( dir >= PI )
+			dir -= PI*2;
+		while( dir < -PI )
+			dir += PI*2;
+		
+		if( dir > .1 )
+			my->ang -= timesync*.004;
+		if( dir < -.1 )
+			my->ang += timesync*.004;
+		
+		if( my->ang >= PI*2 )
+			my->ang -= PI*2;
+		if( my->ang < 0 )
+			my->ang += PI*2;
+	
+		// move the actor
+		if( sqrt( pow(my->x - my->CHAR_DESTX,2) + pow(my->y - my->CHAR_DESTY,2) ) > 3 )
+			speed = 1;
+		
+		// change my image based on frame of animation + direction
+		dir = my->ang + PI/8 - atan2(camy-my->y, camx-my->x);
+		while( dir >= PI*2 )
+			dir -= PI*2;
+		while( dir < 0 )
+			dir += PI*2;
+		
+		frame = 1 + 8*(int)floor(my->CHAR_DISTANCE); // animation
+		frame += (int)floor( dir * 4/PI ); // direction
+		my->texture = &sprite_bmp[frame];
+	}
+	if(my->CHAR_HEALTH <= 0) {
+		// make me a prop
+		if( my->CHAR_ANIM >= 120)
+			my->sizez = 16;
+	
+		// play dying animation
+		my->CHAR_ANIM += timesync*.5;
+		if(my->CHAR_ANIM > 240)
+			my->CHAR_ANIM=240;
+		my->texture = &sprite_bmp[57+my->CHAR_ANIM/40];
 	}
 	
-	// rotate the actor
-	dir = handle->ang - atan2( handle->fskill[6]-handle->y, handle->fskill[5]-handle->x );
-	while( dir >= PI )
-		dir -= PI*2;
-	while( dir < -PI )
-		dir += PI*2;
-	
-	if( dir > .1 )
-		handle->ang -= timesync*.004;
-	if( dir < -.1 )
-		handle->ang += timesync*.004;
-	
-	if( handle->ang >= PI*2 )
-		handle->ang -= PI*2;
-	if( handle->ang < 0 )
-		handle->ang += PI*2;
-	
-	// move the actor
-	if( sqrt( pow(handle->x - handle->fskill[5],2) + pow(handle->y - handle->fskill[6],2) ) > 3 )
-		speed = 1;
-	else
-		speed = 0;
-	
 	// calculate movement forces
-	handle->fskill[3] += speed*timesync;
-	handle->fskill[3] *= max(1-.01*timesync,0);
-	if( !handle->onground )
-		handle->fskill[7] += (-1)+min(1-.006*timesync,1);
+	my->CHAR_VELOCITY += speed*timesync;
+	my->CHAR_VELOCITY *= max(1-.01*timesync,0);
+	if( !my->onground )
+		my->CHAR_FALL += (-1)+min(1-.006*timesync,1);
 	else
-		handle->fskill[7] = 0;
+		my->CHAR_FALL = 0;
 	
-	opx=handle->x+timesync*.00005*handle->fskill[3]*cos(handle->ang);
-	opy=handle->y+timesync*.00005*handle->fskill[3]*sin(handle->ang);
-	opz=handle->z+timesync*.8*handle->fskill[7];
+	opx=my->x+timesync*.00005*my->CHAR_VELOCITY*cos(my->ang);
+	opy=my->y+timesync*.00005*my->CHAR_VELOCITY*sin(my->ang);
+	opz=my->z+timesync*.8*my->CHAR_FALL;
 	
 	// move the actor and record the horizontal distance of the move
-	handle->fskill[0] = handle->x;
-	handle->fskill[1] = handle->y;
-	e_MoveTrace( &handle->x, &handle->y, &handle->z, opx, opy, opz, handle );
-	handle->fskill[2] += sqrt( pow(handle->x - handle->fskill[0],2) + pow(handle->y - handle->fskill[1],2) )*2;
-	if( handle->fskill[2] >= 4 ) handle->fskill[2] = 0;
-	
-	// change my image based on frame of animation + direction
-	dir = handle->ang + PI/8 - atan2(camy-handle->y, camx-handle->x);
-	while( dir >= PI*2 )
-		dir -= PI*2;
-	while( dir < 0 )
-		dir += PI*2;
-	
-	frame = 1 + 8*(int)floor(handle->fskill[2]); // animation
-	frame += (int)floor( dir * 4/PI ); // direction
-	handle->texture = &sprite_bmp[frame];
+	my->CHAR_OLDX = my->x;
+	my->CHAR_OLDY = my->y;
+	e_MoveTrace( &my->x, &my->y, &my->z, opx, opy, opz, my );
+	my->CHAR_DISTANCE += sqrt( pow(my->x - my->CHAR_OLDX,2) + pow(my->y - my->CHAR_OLDY,2) )*2;
+	if( my->CHAR_DISTANCE >= 4 ) my->CHAR_DISTANCE = 0;
 }
 
 /*-------------------------------------------------------------------------------
@@ -120,7 +142,7 @@ void e_ActChar(entity_t *handle) {
 
 -------------------------------------------------------------------------------*/
 
-void e_ActPlayer(entity_t *handle) {
+void e_ActPlayer(entity_t *my) {
 	double f, s, v, turn, look;
 	double co, si;
 	int fly = 0;
@@ -132,7 +154,7 @@ void e_ActPlayer(entity_t *handle) {
 	
 	if( keystatus[SDLK_k] ) {
 		keystatus[SDLK_k] = 0;
-		i_Message( "X=%d Y=%d Z=%d\nAng=%f", (int)floor(handle->x), (int)floor(handle->y), handle->z, handle->ang );
+		i_Message( "X=%d Y=%d Z=%d\nAng=%f", (int)floor(my->x), (int)floor(my->y), my->z, my->ang );
 	}
 	
 	run = (keystatus[SDLK_LSHIFT]+1);
@@ -142,18 +164,18 @@ void e_ActPlayer(entity_t *handle) {
 	s = (keystatus[SDLK_d]-keystatus[SDLK_a])*run; // strafe
 	v = (keystatus[SDLK_e]-keystatus[SDLK_q]);
 	
-	co = cos(handle->ang); si = sin(handle->ang);
+	co = cos(my->ang); si = sin(my->ang);
 	vx += (co*f - si*s)*timesync*.000125;
 	vy += (si*f + co*s)*timesync*.000125;
 	if( fly ) vz = v*timesync/12;
 	else {
-		if( !handle->onground ) vz += (-1)+min(1-.006*timesync,1);
+		if( !my->onground ) vz += (-1)+min(1-.006*timesync,1);
 		else {
 			if( !keystatus[SDLK_SPACE] )
 				vz = 0;
 			else {
 				vz = .5;
-				handle->onground = 0;
+				my->onground = 0;
 			}
 		}
 	}
@@ -176,26 +198,28 @@ void e_ActPlayer(entity_t *handle) {
 		lastentity->y=player->y;
 		lastentity->z=player->z;
 		lastentity->ang=player->ang;
+		
+		lastentity->CHAR_HEALTH = 100;
 	}
 	
 	// my old position
-	handle->fskill[0] = handle->x;
-	handle->fskill[1] = handle->y;
+	my->fskill[0] = my->x;
+	my->fskill[1] = my->y;
 	
 	if( keystatus[SDLK_n] ) { // noclip cheat
-		handle->x += vx*timesync;
-		handle->y += vy*timesync;
-		handle->z += vz*timesync;
+		my->x += vx*timesync;
+		my->y += vy*timesync;
+		my->z += vz*timesync;
 	} else {
-		opx=handle->x+vx*timesync;
-		opy=handle->y+vy*timesync;
-		opz=handle->z+vz*timesync;
-		e_MoveTrace(&handle->x,&handle->y,&handle->z,opx,opy,opz,handle);
-		handle->x = min(max(handle->x,.36),map.width-.36);
-		handle->y = min(max(handle->y,.36),map.height-.36);
+		opx=my->x+vx*timesync;
+		opy=my->y+vy*timesync;
+		opz=my->z+vz*timesync;
+		e_MoveTrace(&my->x,&my->y,&my->z,opx,opy,opz,my);
+		my->x = min(max(my->x,.36),map.width-.36);
+		my->y = min(max(my->y,.36),map.height-.36);
 	}
 	
-	if( handle->onground ) {
+	if( my->onground ) {
 		if( keystatus[SDLK_w] || keystatus[SDLK_s] || keystatus[SDLK_a] || keystatus[SDLK_d] ) {
 			bob1 += bob3*timesync/48;
 			bob1 *= f;
@@ -220,9 +244,9 @@ void e_ActPlayer(entity_t *handle) {
 		}
 	}
 	
-	handle->ang += va;
-	if( handle->ang > PI*2 ) handle->ang -= PI*2;
-	if( handle->ang < 0 ) handle->ang += PI*2;
+	my->ang += va;
+	if( my->ang > PI*2 ) my->ang -= PI*2;
+	if( my->ang < 0 ) my->ang += PI*2;
 	if( la >= 1 || la <= -1 ) 
 		vang += la;
 	x=(yres/240)*114;
@@ -238,15 +262,15 @@ void e_ActPlayer(entity_t *handle) {
 	}
 	if( weap_swap[2] == 0 ) {
 		// fire the weapon
-		if( mousestatus[SDL_BUTTON_LEFT] && weap_skill[2] <= 0 && !(handle->flags&FLAG_UNUSED1) ) {
+		if( mousestatus[SDL_BUTTON_LEFT] && weap_skill[2] <= 0 && !(my->flags&FLAG_UNUSED1) ) {
 			darkness = 1.02;
 			weap_anim = 1;
-			handle->flags |= FLAG_UNUSED1;
+			my->flags |= FLAG_UNUSED1;
 		}
 		
 		// refire is available
 		if( !mousestatus[SDL_BUTTON_LEFT] )
-			handle->flags &= ~(FLAG_UNUSED1);
+			my->flags &= ~(FLAG_UNUSED1);
 		
 		if( weap_anim == 0 ) {
 			// number keys to change weapons
@@ -300,23 +324,31 @@ void e_ActPlayer(entity_t *handle) {
 	}
 	
 	// change my image based on frame of animation + direction
-	dir = handle->ang + PI/8 - atan2(camy-handle->y, camx-handle->x);
+	dir = my->ang + PI/8 - atan2(camy-my->y, camx-my->x);
 	while( dir >= PI*2 )
 		dir -= PI*2;
 	while( dir < 0 )
 		dir += PI*2;
 	
-	handle->fskill[2] += sqrt( pow(handle->x - handle->fskill[0],2) + pow(handle->y - handle->fskill[1],2) )*2;
-	if( handle->fskill[2] >= 4 ) handle->fskill[2] = 0;
-	frame = 1 + 8*(int)floor(handle->fskill[2]); // animation
+	my->fskill[2] += sqrt( pow(my->x - my->fskill[0],2) + pow(my->y - my->fskill[1],2) )*2;
+	if( my->fskill[2] >= 4 ) my->fskill[2] = 0;
+	frame = 1 + 8*(int)floor(my->fskill[2]); // animation
 	frame += (int)floor( dir * 4/PI ); // direction
-	handle->texture = &sprite_bmp[frame];
+	my->texture = &sprite_bmp[frame];
 	
 	// move the camera!
 	if( !keystatus[SDLK_p] ) {
-		camx = handle->x;
-		camy = handle->y;
-		camz = handle->z+bob2+22;
-		camang = handle->ang;
+		camx = my->x;
+		camy = my->y;
+		camz = my->z+bob2+22;
+		camang = my->ang;
 	}
+	
+	// kill troops
+	entity_t *entity;
+	if( keystatus[SDLK_g] )
+		for( entity=firstentity; entity!=NULL; entity=entity->next) {
+			if( entity->behavior == &e_ActChar )
+				entity->CHAR_HEALTH = 0;
+		}
 }

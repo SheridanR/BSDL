@@ -61,8 +61,10 @@ int g_Open( char *file ) {
 	// load textures
 	sky2_bmp = SDL_LoadBMP("images/sky.bmp");
 	sky_bmp = SDL_CreateRGBSurface(SDL_HWSURFACE,1280*screenfactor,468*screenfactor,32,0,0,0,0);
-	SDL_BlitSurface( SPG_Scale( sky2_bmp, screenfactor, screenfactor ), &src, sky_bmp, &dest );
+	//SDL_BlitSurface( SPG_Scale( sky2_bmp, screenfactor, screenfactor ), &src, sky_bmp, &dest );
 	//SDL_BlitSurface( sky2_bmp, &src, sky_bmp, &dest );
+	sky2_bmp = r_ScaleSurface(sky2_bmp, 1280*screenfactor,468*screenfactor);
+	SDL_BlitSurface( sky2_bmp, &src, sky_bmp, &dest );
 	fp = fopen("images/textures.txt","r");
 	for( texture_num=0; !feof(fp); texture_num++ ) {
 		while( fgetc(fp) != '\n' ) if( feof(fp) ) break;

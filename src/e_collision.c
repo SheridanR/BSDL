@@ -33,8 +33,8 @@ int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
 	long fh, ch;
 	entity_t* entity;
 
-	for( sy=-me->sizey; sy<=me->sizey; sy+=me->sizey ) {
-		for( sx=-me->sizex; sx<=me->sizex; sx+=me->sizex ) {
+	for( sy=-me->sizey; sy<=me->sizey; sy+=min(me->sizey,1) ) {
+		for( sx=-me->sizex; sx<=me->sizex; sx+=min(me->sizex,1) ) {
 			fx = floor(tx+sx); fy = floor(ty+sy); // int coordinates
 			ffx = tx+sx; ffy = ty+sy; // float coordinates
 			
@@ -45,9 +45,9 @@ int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
 					if( !(entity->flags&FLAG_PASSABLE) && entity != me ) { // if the entity is neither passable nor myself
 						if( ffx >= entity->x-entity->sizex && ffx <= entity->x+entity->sizex ) { // if this horizontal position intersects with the entity
 							if( ffy >= entity->y-entity->sizey && ffy <= entity->y+entity->sizey ) { // if this vertical position intersects with the entity
-								if( me->z+me->sizez > entity->z+entity->sizez && fh < entity->z+entity->sizez )
+								if( me->z > entity->z && fh < entity->z+entity->sizez )
 									fh=entity->z+entity->sizez; // adjust the floor height to include me!
-								if( me->z-me->sizez < entity->z-entity->sizez && ch > entity->z-entity->sizez )
+								if( me->z < entity->z && ch > entity->z-entity->sizez )
 									ch=entity->z-entity->sizez; // adjust the ceiling height to include me!
 								else if( me->z == entity->z )
 									return(1); // you're level with the entity. stop that ship!
@@ -61,10 +61,10 @@ int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
 			if( (fh-tz) > STEPHEI ) { stepclimb=0; return(1); } // this floor is too high
 			else sfh = max(fh+1,sfh);
 			if( fh+1 >= tz ) me->onground=1; // I am on the ground
-			if( (tz-ch) > STEPHEI ) return(1); // the ceiling is too low
+			if( (tz-ch) > -1 ) return(1); // the ceiling is too low
 			
 			gfh = max(fh+1,gfh); // remember the highest position of the floor for this collision pass
-			gch = min(ch+1,gch); // remember the lowest position of the ceiling for this collision pass
+			gch = min(ch-1,gch); // remember the lowest position of the ceiling for this collision pass
 		}
 	}
 	return(0);
