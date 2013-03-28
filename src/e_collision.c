@@ -279,6 +279,7 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, dou
 		
 		ix = x1 + rx*d;
 		iy = y1 + ry*d;
+		inz += (vangle/4.5)*(d-d2);
 		
 		// check against the map
 		if( map.floors[inx+iny*map.width] >= map.ceilings[inx+iny*map.width] ) break;
@@ -290,7 +291,6 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, dou
 			inz = max(map.floors[inx2+iny2*map.width],inz);
 			break;
 		}
-		inz += (vangle/4.5)*(d-d2);
 		
 		// check against entities
 		// to be fixed: line sometimes passes through entities whose x and y sizes are < .5

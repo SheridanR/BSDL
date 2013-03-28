@@ -39,6 +39,7 @@ P				-	Suspends the camera as long as the key is pressed
 I				-	Spawn an actor
 K				-	Report the player's position
 G				-	Genocide troopers
+0-9				-	Select weapon
 
 ----- CONTACT -----
 
