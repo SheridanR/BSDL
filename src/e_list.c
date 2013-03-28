@@ -115,6 +115,7 @@ void e_DestroyEntity(entity_t *handle) {
 		
 		// otherwise, the "first" pointer needs to point to the next node
 		else {
+			handle->next->previous = NULL;
 			firstentity = handle->next;
 			free( handle );
 		}
@@ -122,6 +123,7 @@ void e_DestroyEntity(entity_t *handle) {
 	
 	// if this is the last node, but not the first...
 	else if( handle == lastentity ) {
+		handle->previous->next = NULL;
 		lastentity = handle->previous; // the "last" pointer needs to point to the previous node
 		free( handle );
 	}

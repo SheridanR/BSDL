@@ -63,3 +63,5 @@ images/actor/playk0.bmp
 images/actor/playl0.bmp
 images/actor/playm0.bmp
 images/actor/playn0.bmp
+images/hit.bmp
+images/chunk.bmp

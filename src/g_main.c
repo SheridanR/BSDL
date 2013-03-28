@@ -69,6 +69,7 @@ int main( int argc, char **argv ) {
 		
 		// flip the page
 		SDL_Flip( screen2 );
+		cycles++;
 	}
 	
 	g_Close(); // stop the engine

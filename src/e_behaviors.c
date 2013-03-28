@@ -37,22 +37,59 @@ void e_Cycle() {
 
 /*-------------------------------------------------------------------------------
 
+	e_ActChunk
+
+	The behavior code of a dirt/mortar chunk particle
+
+-------------------------------------------------------------------------------*/
+
+void e_ActChunk(entity_t* my) {
+	my->skill[1] += timesync;
+	if( my->skill[1] >= 10 ) {
+		my->skill[1] = 0;
+		my->z++;
+	}
+	my->skill[0] += timesync;
+	if(my->skill[0] > 150)
+		e_DestroyEntity(my);
+}
+
+/*-------------------------------------------------------------------------------
+
+	e_ActSplat
+
+	The behavior code of a blood splatter particle
+
+-------------------------------------------------------------------------------*/
+
+void e_ActSplat(entity_t* my) {
+	double opx, opy; int opz;
+
+	// calculate movement forces
+	if( !my->onground )
+		my->SPLAT_AIRTIME += (-1)+min(1-.006*timesync,1);
+	else {
+		my->SPLAT_AIRTIME = 0;
+		my->SPLAT_LIFE += timesync;
+	}
+	
+	// move
+	opx=my->x+timesync*.0005*cos(my->ang);
+	opy=my->y+timesync*.0005*sin(my->ang);
+	opz=my->z+timesync*.2*my->SPLAT_AIRTIME;
+	e_MoveTrace( &my->x, &my->y, &my->z, opx, opy, opz, my );
+	
+	if(my->SPLAT_LIFE > 100)
+		e_DestroyEntity(my);
+}
+
+/*-------------------------------------------------------------------------------
+
 	e_ActChar
 
 	The behavior code of an NPC.
 
 -------------------------------------------------------------------------------*/
-
-#define CHAR_HEALTH skill[0]
-#define CHAR_ANIM skill[1]
-#define CHAR_OLDX fskill[0]
-#define CHAR_OLDY fskill[1]
-#define CHAR_DISTANCE fskill[2]
-#define CHAR_VELOCITY fskill[3]
-#define CHAR_MOVEDELAY fskill[4]
-#define CHAR_DESTX fskill[5]
-#define CHAR_DESTY fskill[6]
-#define CHAR_FALL fskill[7]
 
 void e_ActChar(entity_t *my) {
 	double opx, opy;
@@ -62,34 +99,38 @@ void e_ActChar(entity_t *my) {
 	float speed = 0;
 	
 	if(my->CHAR_HEALTH > 0) {
-		// count to ten, choose a destination.
-		my->CHAR_MOVEDELAY -= timesync;
-		if( my->CHAR_MOVEDELAY <= 0 ) {
-			my->CHAR_MOVEDELAY = 3000;
-			my->CHAR_DESTX = min(max(my->x,8),map.width-8)-8+(rand()%16)+1;
-			my->CHAR_DESTY = min(max(my->y,8),map.height-8)-8+(rand()%16)+1;
+		if(my->CHAR_PAIN <= 0) {
+			// count to ten, choose a destination.
+			my->CHAR_MOVEDELAY -= timesync;
+			if( my->CHAR_MOVEDELAY <= 0 ) {
+				my->CHAR_MOVEDELAY = 3000;
+				my->CHAR_DESTX = min(max(my->x,8),map.width-8)-8+(rand()%16)+1;
+				my->CHAR_DESTY = min(max(my->y,8),map.height-8)-8+(rand()%16)+1;
+			}
+			
+			// rotate the actor
+			dir = my->ang - atan2( my->CHAR_DESTY-my->y, my->CHAR_DESTX-my->x );
+			while( dir >= PI )
+				dir -= PI*2;
+			while( dir < -PI )
+				dir += PI*2;
+			
+			if( dir > .1 )
+				my->ang -= timesync*.004;
+			if( dir < -.1 )
+				my->ang += timesync*.004;
+			
+			if( my->ang >= PI*2 )
+				my->ang -= PI*2;
+			if( my->ang < 0 )
+				my->ang += PI*2;
+			
+			// move the actor
+			if( sqrt( pow(my->x - my->CHAR_DESTX,2) + pow(my->y - my->CHAR_DESTY,2) ) > 3 )
+				speed = 1;
 		}
-		
-		// rotate the actor
-		dir = my->ang - atan2( my->CHAR_DESTY-my->y, my->CHAR_DESTX-my->x );
-		while( dir >= PI )
-			dir -= PI*2;
-		while( dir < -PI )
-			dir += PI*2;
-		
-		if( dir > .1 )
-			my->ang -= timesync*.004;
-		if( dir < -.1 )
-			my->ang += timesync*.004;
-		
-		if( my->ang >= PI*2 )
-			my->ang -= PI*2;
-		if( my->ang < 0 )
-			my->ang += PI*2;
-	
-		// move the actor
-		if( sqrt( pow(my->x - my->CHAR_DESTX,2) + pow(my->y - my->CHAR_DESTY,2) ) > 3 )
-			speed = 1;
+		else
+			my->CHAR_PAIN -= timesync;
 		
 		// change my image based on frame of animation + direction
 		dir = my->ang + PI/8 - atan2(camy-my->y, camx-my->x);
@@ -98,7 +139,10 @@ void e_ActChar(entity_t *my) {
 		while( dir < 0 )
 			dir += PI*2;
 		
-		frame = 1 + 8*(int)floor(my->CHAR_DISTANCE); // animation
+		if( my->CHAR_PAIN <= 0 )
+			frame = 1 + 8*(int)floor(my->CHAR_DISTANCE); // animation
+		else
+			frame = 49;
 		frame += (int)floor( dir * 4/PI ); // direction
 		my->texture = &sprite_bmp[frame];
 	}
@@ -151,6 +195,7 @@ void e_ActPlayer(entity_t *my) {
 	int x;
 	int frame;
 	float dir;
+	float offset;
 	
 	if( keystatus[SDLK_k] ) {
 		keystatus[SDLK_k] = 0;
@@ -190,8 +235,8 @@ void e_ActPlayer(entity_t *my) {
 		lastentity->behavior = &e_ActChar;
 		lastentity->texture = &sprite_bmp[1];
 		
-		lastentity->sizex = .45;
-		lastentity->sizey = .45;
+		lastentity->sizex = .5;
+		lastentity->sizey = .5;
 		lastentity->sizez = 52;
 	
 		lastentity->x=player->x+3;
@@ -265,7 +310,13 @@ void e_ActPlayer(entity_t *my) {
 		if( mousestatus[SDL_BUTTON_LEFT] && weap_skill[2] <= 0 && !(my->flags&FLAG_UNUSED1) ) {
 			darkness = 1.02;
 			weap_anim = 1;
-			my->flags |= FLAG_UNUSED1;
+			my->flags |= FLAG_UNUSED1; // holding the trigger
+			if( selected_weapon == 2 )
+				e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang, vang ));
+			else if( selected_weapon == 3 ) {
+				for( offset=-8; offset<=8; offset+=4 )
+					e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang+(offset*PI/180), vang ));
+			}
 		}
 		
 		// refire is available

@@ -27,11 +27,12 @@ int mousex, mousey, omousex, omousey;
 SDL_Event event;
 
 // general vars
-long fps = 0;       // frames per second
-double t, ot, timesync; // used to calculate speed of last frame
-int gameloop;           // determines whether or not the main game loop should continue
-char message_str[64];   // onscreen message string
-int message_time;       // the time before a message will disappear
+long fps = 0;             // frames per second
+double t, ot, timesync;   // used to calculate speed of last frame
+int gameloop;             // determines whether or not the main game loop should continue
+char message_str[64];     // onscreen message string
+int message_time;         // the time before a message will disappear
+unsigned long cycles = 0; // number of cycles the game has been running
 
 // collision variables
 int gfh, gch;

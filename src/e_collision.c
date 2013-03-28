@@ -40,7 +40,7 @@ int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
 			
 			fh = map.floors[fx+fy*map.width] + (me->sizez*.5) - 1; // get the initial floor/ceiling heights
 			ch = map.ceilings[fx+fy*map.width] - (me->sizez*.5) - 1;
-			if( firstentity != NULL ) { // check against entities
+			if( firstentity != NULL && !(me->flags&FLAG_PASSABLE) ) { // check against entities
 				for( entity=firstentity; entity!=NULL; entity=entity->next ) {
 					if( !(entity->flags&FLAG_PASSABLE) && entity != me ) { // if the entity is neither passable nor myself
 						if( ffx >= entity->x-entity->sizex && ffx <= entity->x+entity->sizex ) { // if this horizontal position intersects with the entity
@@ -227,6 +227,143 @@ void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2,
 	*z1 = tracez;
 }
 
-void e_LineTrace( double x1, double y1, int z1, double angle, double vangle ) {
-	// empty implementation
+/*-------------------------------------------------------------------------------
+
+	e_LineTrace
+
+	Trace a line from x1, y1, z1 along the provided heading and report
+	information on the first obstacle in a hit_t struct
+
+-------------------------------------------------------------------------------*/
+
+hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, double vangle ) {
+	entity_t *entity;
+	hit_t hit;
+	int posx, posy;
+	double fracx, fracy;
+	double cosang, sinang;
+	double rx, ry;
+	double ix, iy;
+	int inx, iny, inz;
+	int inx2, iny2;
+	double arx, ary;
+	double dincx, dval0, dincy, dval1;
+	double d;
+	double d2;
+	
+	posx=floor(x1); posy=floor(y1); // integer coordinates
+	fracx=x1-posx; fracy=y1-posy; // fraction coordinates
+	hx = xres>>1; hy = (yres>>1)+vangle; hz = hx;
+	cosang = cos(angle); sinang = sin(angle);
+	rx = cosang*2.0;
+	ry = sinang*2.0;
+	d = 1.0/hz; cosang *= d; sinang *= d; ix=0; iy=0;
+
+	inx=posx; iny=posy; inz=z1;
+	inx2=inx; iny2=iny;
+	arx=0; if (rx) arx = 1.0/fabs(rx);
+	ary=0; if (ry) ary = 1.0/fabs(ry);
+	dincx=0; dval0=1e32; dincy=0; dval1=1e32;
+	if (rx<0) {dincx=-1; dval0=fracx*arx;} else if (rx>0) {dincx=1; dval0=(1.0-fracx)*arx;}
+	if (ry<0) {dincy=-1; dval1=fracy*ary;} else if (ry>0) {dincy=1; dval1=(1.0-fracy)*ary;}
+	d=.1;
+	hit.entity = NULL;
+	
+	// trace the line
+	while( d < 64 ) {
+		inx2=inx; iny2=iny;
+		d2=d;
+		if( dval1>dval0 ) { inx+=dincx; d=dval0; dval0+=arx; }
+		else { iny+=dincy; d=dval1; dval1+=ary; }
+		if( inx < 0 || iny < 0 || inx >= map.width || iny >= map.height ) break;
+		
+		ix = x1 + rx*d;
+		iy = y1 + ry*d;
+		
+		// check against the map
+		if( map.floors[inx+iny*map.width] >= map.ceilings[inx+iny*map.width] ) break;
+		if( map.ceilings[inx+iny*map.width] <= inz ) {
+			inz = min(map.ceilings[inx2+iny2*map.width],inz);
+			break;
+		}
+		else if( map.floors[inx+iny*map.width] >= inz ) {
+			inz = max(map.floors[inx2+iny2*map.width],inz);
+			break;
+		}
+		inz += (vangle/4.5)*(d-d2);
+		
+		// check against entities
+		// to be fixed: line sometimes passes through entities whose x and y sizes are < .5
+		if( firstentity != NULL ) {
+			for( entity=firstentity; entity!=NULL; entity=entity->next ) {
+				if( !(entity->flags&FLAG_PASSABLE) && entity != me ) {
+					if( ix >= entity->x-entity->sizex && ix <= entity->x+entity->sizex ) {
+						if( iy >= entity->y-entity->sizey && iy <= entity->y+entity->sizey ) {
+							if( inz >= entity->z-entity->sizez && inz <= entity->z+entity->sizez ) {
+								ix = entity->x;
+								iy = entity->y;
+								inz = entity->z;
+								hit.entity = entity;
+								d=64;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	hit.x = ix;
+	hit.y = iy;
+	hit.z = inz;
+	return hit;
+}
+/*-------------------------------------------------------------------------------
+
+	e_CheckHit
+	
+	Takes a hit_t struct and spawns a different particle depending upon
+	the nature of what was hit
+
+-------------------------------------------------------------------------------*/
+
+void e_CheckHit(hit_t hitspot) {
+	if(hitspot.entity != NULL) {
+		if(hitspot.entity->behavior == &e_ActChar) { // shot an enemy
+			// hurt him
+			hitspot.entity->CHAR_HEALTH -= 20;
+			hitspot.entity->CHAR_PAIN = 100;
+			
+			// make a splat
+			e_CreateEntity();
+			lastentity->behavior = &e_ActSplat;
+			lastentity->texture = &sprite_bmp[64];
+			lastentity->flags |= FLAG_PASSABLE;
+			
+			lastentity->sizex = .25;
+			lastentity->sizey = .25;
+			lastentity->sizez = 16;
+			
+			lastentity->x=hitspot.x;
+			lastentity->y=hitspot.y;
+			lastentity->z=hitspot.z;
+			lastentity->ang=rand()*360;
+			
+			lastentity->SPLAT_AIRTIME = 1;
+		}	
+	}
+	else {
+		// make a chunk
+		e_CreateEntity();
+		lastentity->behavior = &e_ActChunk;
+		lastentity->texture = &sprite_bmp[65];
+		lastentity->flags |= FLAG_PASSABLE;
+		
+		lastentity->sizex = .25;
+		lastentity->sizey = .25;
+		lastentity->sizez = 16;
+		
+		lastentity->x=hitspot.x;
+		lastentity->y=hitspot.y;
+		lastentity->z=hitspot.z;
+	}
 }

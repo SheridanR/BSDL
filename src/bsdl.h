@@ -59,6 +59,12 @@ typedef struct entity_t {
 	void (*behavior)(struct entity_t *handle); // pointer to behavior function
 } entity_t;
 
+// hit structure
+typedef struct hit_t {
+	double x, y; int z;
+	entity_t *entity;
+} hit_t;
+
 // entity list
 extern entity_t *firstentity; // first entity in list
 extern entity_t *lastentity;  // last entity in list
@@ -92,11 +98,12 @@ extern int mousex, mousey, omousex, omousey;
 extern SDL_Event event;
 
 // general vars
-extern long fps;       // frames per second      
+extern long fps;               // frames per second      
 extern double t, ot, timesync; // used to calculate speed of last frame
 extern int gameloop;           // determines whether or not the main game loop should continue
 extern char message_str[64];   // onscreen message string
 extern int message_time;       // the time before a message will disappear
+extern unsigned long cycles;   // number of cycles the game has been running
 
 // collision variables
 extern int gfh, gch;
@@ -165,12 +172,28 @@ extern bitmap_t shotgun_bmp[9];
 
 // entity functions
 extern void e_Cycle();
-extern void e_ActGangster(entity_t* handle);
+extern void e_ActChunk(entity_t* handle);
+#define SPLAT_AIRTIME fskill[0]
+#define SPLAT_LIFE skill[0]
+extern void e_ActSplat(entity_t* handle);
+#define CHAR_HEALTH skill[0]
+#define CHAR_ANIM skill[1]
+#define CHAR_PAIN skill[2]
+#define CHAR_OLDX fskill[0]
+#define CHAR_OLDY fskill[1]
+#define CHAR_DISTANCE fskill[2]
+#define CHAR_VELOCITY fskill[3]
+#define CHAR_MOVEDELAY fskill[4]
+#define CHAR_DESTX fskill[5]
+#define CHAR_DESTY fskill[6]
+#define CHAR_FALL fskill[7]
+extern void e_ActChar(entity_t* handle);
 extern void e_ActPlayer(entity_t* handle);
 extern int e_CheckCells( double tx, double ty, int tz, entity_t* me );
 extern int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double vz, entity_t* me );
 extern void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2, entity_t* me );
-extern void e_LineTrace( double x1, double y1, int z1, double angle, double vangle );
+extern hit_t e_LineTrace( entity_t *my, double x1, double y1, int z1, double angle, double vangle );
+extern void e_CheckHit( hit_t hitspot );
 extern void e_FreeAll(void);
 extern void e_CreateEntity(void);
 extern void e_DestroyEntity(entity_t *handle);
