@@ -164,8 +164,8 @@ int g_Open( char *file ) {
 	player = lastentity;
 	player->behavior = &e_ActPlayer;
 	
-	player->sizex = .45;
-	player->sizey = .45;
+	player->sizex = .5;
+	player->sizey = .5;
 	player->sizez = 52;
 	
 	player->x=2.5;
