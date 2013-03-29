@@ -18,13 +18,15 @@ Welcome to Bubbenstein/SDL (aka BSDL)!
 
 8) A complex entity subsystem for in-game objects, particles, and actors
 
+9) A direction and position based sound system using the SDL_mixer library
+
 I personally have a makeshift world editor to make game maps, but the interface is nasty, the code is ugly, and the thingy can only be built on Linux. I'd be willing to pass any interested person some builds/code if they really wanted it, but to tell the truth, I'd be far more interested if said person were willing to work with me to build a new set of tools from scratch. :)
 
 ----- HOW TO USE -----
 
 The core engine is still in a basic state right now. If you start it up without any arguments, it will load "testmap.bsm". You can pass other filenames to the engine to have it load different maps. This is possible both at the command line and by dragging and dropping the map files to the engine in Windows.
 
-There is not much to do besides wandering around, shooting at the walls, and spawning space troopers. Regardless, here are the controls for the game:
+Here are the controls for the game:
 
 Escape			-	Close the program
 W, A, S, D		-	Move forward, left, backwards, and right, respectively
@@ -40,6 +42,7 @@ I				-	Spawn an actor
 K				-	Report the player's position
 G				-	Genocide troopers
 0-9				-	Select weapon
+B				-	Test sound effect
 
 ----- CONTACT -----
 

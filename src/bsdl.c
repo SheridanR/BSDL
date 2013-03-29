@@ -92,3 +92,11 @@ bitmap_t *sprite_bmp;
 // weapon textures
 bitmap_t pistol_bmp[5];
 bitmap_t shotgun_bmp[9];
+
+// sound effects (uses SDL_mixer)
+int audio_rate = 22050;
+Uint16 audio_format = AUDIO_S16;
+int audio_channels = 2;
+int audio_buffers = 512;
+Mix_Chunk **sounds;
+unsigned int sound_num;

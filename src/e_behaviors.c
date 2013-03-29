@@ -197,9 +197,16 @@ void e_ActPlayer(entity_t *my) {
 	float dir;
 	float offset;
 	
+	// report position
 	if( keystatus[SDLK_k] ) {
 		keystatus[SDLK_k] = 0;
 		i_Message( "X=%d Y=%d Z=%d\nAng=%f", (int)floor(my->x), (int)floor(my->y), my->z, my->ang );
+	}
+	
+	// play sound effect
+	if( keystatus[SDLK_b] ) {
+		keystatus[SDLK_b] = 0;
+		i_Message( "Mix_PlayChannel: %d", Mix_PlayChannel(-1, sounds[0], 0));
 	}
 	
 	run = (keystatus[SDLK_LSHIFT]+1);
@@ -311,9 +318,12 @@ void e_ActPlayer(entity_t *my) {
 			darkness = 1.02;
 			weap_anim = 1;
 			my->flags |= FLAG_UNUSED1; // holding the trigger
-			if( selected_weapon == 2 )
+			if( selected_weapon == 2 ) {
+				a_EntitySound(my,sounds[4],64);
 				e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang, vang ));
+			}
 			else if( selected_weapon == 3 ) {
+				a_EntitySound(my,sounds[6],64);
 				for( offset=-8; offset<=8; offset+=4 )
 					e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang+(offset*PI/180), vang ));
 			}

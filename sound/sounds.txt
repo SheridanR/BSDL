@@ -1,0 +1,9 @@
+sound/aliendie.wav
+sound/confirm1.wav
+sound/expl.wav
+sound/pain.wav
+sound/pistol1.wav
+sound/reload.wav
+sound/shotg.wav
+sound/swipe.wav
+sound/tone.wav

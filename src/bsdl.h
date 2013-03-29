@@ -11,6 +11,7 @@
 
 #include "SDL.h"
 #include "sprig.h"
+#include "SDL_mixer.h"
 
 // game world structure
 typedef struct map_t {
@@ -170,6 +171,12 @@ extern bitmap_t *sprite_bmp;
 extern bitmap_t pistol_bmp[5];
 extern bitmap_t shotgun_bmp[9];
 
+// sound effects (uses SDL_mixer)
+extern int audio_rate, audio_channels, audio_buffers;
+extern Uint16 audio_format;
+extern Mix_Chunk **sounds;
+unsigned int sound_num;
+
 // entity functions
 extern void e_Cycle();
 extern void e_ActChunk(entity_t* handle);
@@ -218,3 +225,6 @@ extern void r_DrawColumns( double ox, double oy, int oz, double angle, double va
 extern void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle );
 extern void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle );
 extern SDL_Surface* r_ScaleSurface(SDL_Surface *Surface, Uint16 Width, Uint16 Height);
+
+// sound functions
+extern int a_EntitySound(entity_t *entity, Mix_Chunk *snd, int vol);

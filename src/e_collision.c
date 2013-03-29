@@ -331,7 +331,11 @@ void e_CheckHit(hit_t hitspot) {
 		if(hitspot.entity->behavior == &e_ActChar) { // shot an enemy
 			// hurt him
 			hitspot.entity->CHAR_HEALTH -= 20;
-			hitspot.entity->CHAR_PAIN = 100;
+			
+			// check that he hasn't yet been shot this frame (to prevent simultaneous pain sounds)
+			if(hitspot.entity->CHAR_PAIN <= 0)
+				a_EntitySound(hitspot.entity,sounds[3],64);
+			hitspot.entity->CHAR_PAIN = 100; // put him in pain
 			
 			// make a splat
 			e_CreateEntity();

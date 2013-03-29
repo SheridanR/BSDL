@@ -32,6 +32,7 @@ int g_Open( char *file ) {
 	FILE *fp;
 	char name[32];
 	char valid_data[10];
+	Mix_Chunk *psize;
 
 	gameloop = 1;
 	hx=xres>>1; hy=yres>>1; hz = hx;
@@ -182,6 +183,12 @@ int g_Open( char *file ) {
 		g_Close();
 		exit(4);
 	}
+	
+	// open audio
+	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)) {
+		printf("Unable to open audio!\n");
+		exit(1);
+	}
 
 	// create a screen surface
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE,xres,yres,32,0,0,0,0); // this is the drawing buffer
@@ -197,6 +204,20 @@ int g_Open( char *file ) {
 	// reset the clock
 	ot=SDL_GetTicks();
 	i_GetFrameRate();
+	
+	// load sound effects
+	fp = fopen("sound/sounds.txt","r");
+	for( sound_num=0; !feof(fp); sound_num++ ) {
+		while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
+	}
+	fclose(fp);
+	sounds = (Mix_Chunk **) malloc(sizeof(psize)*sound_num);
+	fp = fopen("sound/sounds.txt","r");
+	for( x=0; !feof(fp); x++ ) {
+		fscanf(fp,"%s",name); while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
+		sounds[x] = Mix_LoadWAV(name);
+	}
+	fclose(fp);
 	
 	// report a success!
 	i_Message( "Map loaded: %s", file );
@@ -215,7 +236,13 @@ void g_Close(void) {
 	long x;
 	
 	// close SDL
+	Mix_CloseAudio();
 	SDL_Quit();
+	
+	// free sound effects
+	for(x=0; x<sound_num; x++)
+		Mix_FreeChunk(sounds[x]);
+	free(sounds);
 
 	// free all entities
 	e_FreeAll();
