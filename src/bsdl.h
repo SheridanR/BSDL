@@ -175,7 +175,9 @@ extern bitmap_t shotgun_bmp[9];
 extern int audio_rate, audio_channels, audio_buffers;
 extern Uint16 audio_format;
 extern Mix_Chunk **sounds;
-unsigned int sound_num;
+extern unsigned int sound_num;
+extern Mix_Music *music;
+extern int musicplaying;
 
 // entity functions
 extern void e_Cycle();

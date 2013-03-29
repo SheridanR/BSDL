@@ -209,6 +209,16 @@ void e_ActPlayer(entity_t *my) {
 		i_Message( "Mix_PlayChannel: %d", Mix_PlayChannel(-1, sounds[0], 0));
 	}
 	
+	// toggle music
+	if( keystatus[SDLK_m] ) {
+		keystatus[SDLK_m] = 0;
+		if(musicplaying)
+			Mix_HaltMusic();
+		else
+			Mix_PlayMusic(music, -1);
+		musicplaying=(musicplaying==0);
+	}
+	
 	run = (keystatus[SDLK_LSHIFT]+1);
 	turn = mousex*run*.05;
 	look = -mousey*run*7;

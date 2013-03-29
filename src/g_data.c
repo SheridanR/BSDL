@@ -219,8 +219,15 @@ int g_Open( char *file ) {
 	}
 	fclose(fp);
 	
+	// load music
+	music = Mix_LoadMUS("music/dead.mid");
+	if( music == NULL )
+		i_Message("failed");
+	Mix_PlayMusic(music, -1);
+	musicplaying=1;
+	
 	// report a success!
-	i_Message( "Map loaded: %s", file );
+	//i_Message( "Map loaded: %s", file );
 	return(0);
 }
 
@@ -243,6 +250,7 @@ void g_Close(void) {
 	for(x=0; x<sound_num; x++)
 		Mix_FreeChunk(sounds[x]);
 	free(sounds);
+	Mix_FreeMusic(music);
 
 	// free all entities
 	e_FreeAll();

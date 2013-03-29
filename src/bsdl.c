@@ -100,3 +100,5 @@ int audio_channels = 2;
 int audio_buffers = 512;
 Mix_Chunk **sounds;
 unsigned int sound_num;
+Mix_Music *music;
+int musicplaying;
