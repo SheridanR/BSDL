@@ -30,6 +30,7 @@ void r_ClearBuffers(void) {
 	memset( zbuffer, 0, sizeof(zbuffer) );
 	memcpy( floorbuffer, floorbuffer_s, sizeof(floorbuffer) );
 	memset( rowbuffer, 0, sizeof(rowbuffer) );
+	drawsky=0;
 }
 
 /*-------------------------------------------------------------------------------

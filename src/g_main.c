@@ -28,10 +28,11 @@
 
 int main( int argc, char **argv ) {
 	SDL_Rect src, dest;
-	src.x=1; dest.x=0;
-	src.y=1; dest.y=0;
-	src.w=xres*screenscale-screenscale-1; dest.w=0;
-	src.h=yres*screenscale-screenscale-1; dest.h=0;
+	
+	src.x = 0; dest.x = 0;
+	src.y = 0; dest.y = 0;
+	src.w = xres; dest.w = 0;
+	src.h = yres; dest.h = 0;
 	
 	// get a new random seed
 	srand(time(0));
@@ -49,8 +50,8 @@ int main( int argc, char **argv ) {
 		e_Cycle();
 		
 		// rendering
-		r_ClearBuffers();
 		r_DrawSky( camang, vang );
+		r_ClearBuffers();
 		r_DrawColumns( camx, camy, camz, camang, vang );
 		r_DrawFloors( camx, camy, camz, camang, vang );
 		r_DrawSprites( camx, camy, camz, camang, vang );
@@ -63,9 +64,8 @@ int main( int argc, char **argv ) {
 		}
 		i_PrintText( font8_bmp, 4, yres-20, "FPS: %d", fps );
 		
-		// paste the drawing surface to the screen surface, resizing it
-		//SDL_BlitSurface( SPG_Scale( screen, screenscale, screenscale ), &src, screen2, &dest );
-		SDL_BlitSurface( screen, &src, screen2, &dest );
+		// blit screen to screen2 (faster than locking/unlocking screen)
+		SDL_BlitSurface(screen, &src, screen2, &dest);
 		
 		// flip the page
 		SDL_Flip( screen2 );

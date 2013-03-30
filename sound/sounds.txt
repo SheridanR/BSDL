@@ -1,5 +1,5 @@
-sound/aliendie.wav
 sound/confirm1.wav
+sound/aliendie.wav
 sound/expl.wav
 sound/pain.wav
 sound/pistol1.wav

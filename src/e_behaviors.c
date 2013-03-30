@@ -27,9 +27,11 @@
 -------------------------------------------------------------------------------*/
 
 void e_Cycle() {
-	entity_t *entity;
+	entity_t *entity=firstentity;
+	entity_t *nextentity=entity->next;
 	
-	for( entity=firstentity; entity!=NULL; entity=entity->next) {
+	for( entity=firstentity; entity!=NULL; entity=nextentity) {
+		nextentity = entity->next;
 		if( entity->behavior != NULL )
 			(*entity->behavior)(entity); // execute the entity's behavior function
 	}

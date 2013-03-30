@@ -37,12 +37,12 @@ int g_Open( char *file ) {
 	gameloop = 1;
 	hx=xres>>1; hy=yres>>1; hz = hx;
 	
-	SDL_Rect src, dest;
 	screenfactor = ((float)(xres))/320.0;
-	src.x=0; dest.x=0;
-	src.y=0; dest.y=0;
-	src.w=1280*screenfactor; dest.w=0;
-	src.h=468*screenfactor; dest.h=0;
+	//SDL_Rect src, dest;
+	//src.x=0; dest.x=0;
+	//src.y=0; dest.y=0;
+	//src.w=1280*screenfactor; dest.w=0;
+	//src.h=468*screenfactor; dest.h=0;
 
 	// build some tables
 	map.loaded = 0;
@@ -61,11 +61,11 @@ int g_Open( char *file ) {
 	
 	// load textures
 	sky2_bmp = SDL_LoadBMP("images/sky.bmp");
-	sky_bmp = SDL_CreateRGBSurface(SDL_HWSURFACE,1280*screenfactor,468*screenfactor,32,0,0,0,0);
+	sky_bmp = r_ScaleSurface(sky2_bmp, 1280*screenfactor,468*screenfactor);
+	//sky_bmp = SDL_CreateRGBSurface(SDL_HWSURFACE,1280*screenfactor,468*screenfactor,32,0,0,0,0);
 	//SDL_BlitSurface( SPG_Scale( sky2_bmp, screenfactor, screenfactor ), &src, sky_bmp, &dest );
 	//SDL_BlitSurface( sky2_bmp, &src, sky_bmp, &dest );
-	sky2_bmp = r_ScaleSurface(sky2_bmp, 1280*screenfactor,468*screenfactor);
-	SDL_BlitSurface( sky2_bmp, &src, sky_bmp, &dest );
+	//SDL_BlitSurface( sky2_bmp, &src, sky_bmp, &dest );
 	fp = fopen("images/textures.txt","r");
 	for( texture_num=0; !feof(fp); texture_num++ ) {
 		while( fgetc(fp) != '\n' ) if( feof(fp) ) break;
@@ -191,8 +191,8 @@ int g_Open( char *file ) {
 	}
 
 	// create a screen surface
-	screen = SDL_CreateRGBSurface(SDL_HWSURFACE,xres,yres,32,0,0,0,0); // this is the drawing buffer
-	screen2 = SDL_SetVideoMode( xres*screenscale, yres*screenscale, 32, SDL_HWSURFACE | SDL_FULLSCREEN ); // this is the actual screen surface
+	screen = SDL_CreateRGBSurface(SDL_HWSURFACE,xres,yres,32,0,0,0,0);
+	screen2 = SDL_SetVideoMode( xres, yres, 32, SDL_HWSURFACE | SDL_FULLSCREEN );
 	if( screen == NULL || screen2 == NULL ) {
 		printf("ERROR: Could not create video surface. Aborting...\n\n");
 		g_Close();
@@ -221,13 +221,11 @@ int g_Open( char *file ) {
 	
 	// load music
 	music = Mix_LoadMUS("music/dead.mid");
-	if( music == NULL )
-		i_Message("failed");
-	Mix_PlayMusic(music, -1);
-	musicplaying=1;
+	//Mix_PlayMusic(music, -1);
+	musicplaying=0;
 	
 	// report a success!
-	//i_Message( "Map loaded: %s", file );
+	i_Message( "Map loaded: %s", file );
 	return(0);
 }
 
@@ -242,9 +240,9 @@ int g_Open( char *file ) {
 void g_Close(void) {
 	long x;
 	
-	// close SDL
-	Mix_CloseAudio();
-	SDL_Quit();
+	// stop sound effects
+	Mix_HaltChannel(-1);
+	Mix_HaltMusic();
 	
 	// free sound effects
 	for(x=0; x<sound_num; x++)
@@ -288,4 +286,8 @@ void g_Close(void) {
 	r_FreeBmp( &shotgun_bmp[6] );
 	
 	SDL_FreeSurface(screen);
+	
+	// close SDL
+	Mix_CloseAudio();
+	SDL_Quit();
 }

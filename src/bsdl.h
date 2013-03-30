@@ -140,7 +140,6 @@ extern SDL_Surface *screen, *screen2;
 
 #define xres 640 // window size x
 #define yres 480 // window size y
-#define screenscale 1 // for scaling low resolution pictures to high-res displays
 
 extern float darkness; // depth shading strength; higher number = more darkness
 
@@ -149,6 +148,7 @@ extern float zbuffer[yres][xres];        // used to sort objects front to back
 extern int floorbuffer[yres][xres][2];   // holds information that will be used to draw floors
 extern int floorbuffer_s[yres][xres][2]; // holds information that will be used to draw floors
 extern char rowbuffer[yres];             // used to determine which floor/ceiling rows need to be drawn
+extern int drawsky;                      // used to clip the sky to regions of the screen where it needs to be drawn
 
 extern double sprsize; // used to resize sprites correctly regardless of resolution
 extern double texsize; // same, only for walls
