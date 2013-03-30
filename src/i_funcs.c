@@ -117,7 +117,7 @@ void i_ReceiveInput(void) {
 		src.h=yres; dest.h=0;
 		
 		temp = SDL_CreateRGBSurface(SDL_HWSURFACE,xres,yres,32,0,0,0,0);
-		SDL_BlitSurface( screen2, &src, temp, &dest );
+		SDL_BlitSurface( screen, &src, temp, &dest );
 		SDL_SaveBMP( temp, filename );
 		SDL_FreeSurface( temp );
 		numshots++;

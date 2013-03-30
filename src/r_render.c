@@ -252,6 +252,8 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 							screenindex += screen->pitch;
 						}
 					}
+					else
+						drawsky=1; // sky is visible in this frame
 				}
 			}
 			lastheight2=map.ceilings[inx+iny*map.width];
@@ -376,6 +378,8 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 						screenindex += screen->pitch;
 					}
 				}
+				else
+					drawsky=1; // sky is visible in this frame
 			}
 			lastheight1=map.floors[inx+iny*map.width];
 			
@@ -534,6 +538,8 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						zbuffer[ y ][ x ] = d;
 					}
+					else
+						drawsky=1;
 				}
 			}
 			tU += dU;
@@ -640,6 +646,8 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						zbuffer[ y ][ x ] = d;
 					}
+					else
+						drawsky=1;
 				}
 			}
 			tU += dU;

@@ -71,6 +71,7 @@ float zbuffer[yres][xres];        // used to sort objects front to back
 int floorbuffer[yres][xres][2];   // holds information that will be used to draw floors
 int floorbuffer_s[yres][xres][2]; // holds information that will be used to draw floors
 char rowbuffer[yres];             // used to determine which floor/ceiling rows need to be drawn
+int drawsky;                      // used to clip the sky to regions of the screen where it needs to be drawn
 
 double sprsize; // used to resize sprites correctly regardless of resolution
 double texsize; // same, only for walls

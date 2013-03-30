@@ -35,6 +35,7 @@ void e_FreeAll(void) {
 	for( handle=firstentity; handle!=NULL; handle=nexthandle) {
 		nexthandle = handle->next;
 		free(handle);
+		handle=NULL;
 	}
 	firstentity = NULL;
 	lastentity = NULL;
@@ -50,6 +51,7 @@ void e_FreeAll(void) {
 
 void e_CreateEntity(void) {
 	entity_t* handle;
+	int x;
 	
 	// allocate memory
 	if( (handle = (entity_t *) malloc(sizeof(entity_t))) == NULL ) {
@@ -78,15 +80,10 @@ void e_CreateEntity(void) {
 	handle->sizex=0;
 	handle->sizey=0;
 	handle->sizez=0;
-	handle->skill[0]=0;
-	handle->skill[1]=0;
-	handle->skill[2]=0;
-	handle->skill[3]=0;
-	handle->skill[4]=0;
-	handle->skill[5]=0;
-	handle->skill[6]=0;
-	handle->skill[7]=0;
-	handle->skill[8]=0;
+	for( x=0; x<9; x++ ) {
+		handle->skill[x]=0;
+		handle->fskill[x]=0;
+	}
 	handle->flags=0;
 	handle->texture=NULL;
 	handle->behavior=NULL;

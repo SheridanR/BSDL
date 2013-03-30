@@ -187,6 +187,9 @@ void r_DrawSky( double angle, double vangle ) {
 	SDL_Rect dest;
 	SDL_Rect src;
 	
+	if( !drawsky ) // no sky visible
+		return;
+	
 	// move the images differently depending upon the screen size
 	screenfactor = ((float)(xres))/320.0;
 
@@ -196,10 +199,12 @@ void r_DrawSky( double angle, double vangle ) {
 
 	src.x = -skyx;
 	src.y = -skyy;
-	src.w = (-skyx)+320*screenfactor; // clip to the screen width
-	src.h = (-skyy)+240*screenfactor; // clip to the screen height
+	src.w = (-skyx)+xres; // clip to the screen width
+	src.h = (-skyy)+yres; // clip to the screen height
 	dest.x = 0;
 	dest.y = 0;
+	dest.w = xres;
+	dest.h = yres;
 	
 	SDL_BlitSurface(sky_bmp, &src, screen, &dest);
 	
@@ -207,10 +212,12 @@ void r_DrawSky( double angle, double vangle ) {
 	if( skyx < -960*screenfactor ) {
 		dest.x = 1280*screenfactor+skyx;
 		dest.y = 0;
+		dest.w = xres;
+		dest.h = yres;
 		src.x = 0;
 		src.y = -skyy;
-		src.w = 320*screenfactor-(-skyx-1280*screenfactor);
-		src.h = src.y+240*screenfactor;
+		src.w = xres-(-skyx-1280*screenfactor);
+		src.h = src.y+yres;
 		SDL_BlitSurface(sky_bmp, &src, screen, &dest);
 	}
 }
