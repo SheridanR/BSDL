@@ -102,8 +102,9 @@ extern SDL_Event event;
 extern long fps;               // frames per second      
 extern double t, ot, timesync; // used to calculate speed of last frame
 extern int gameloop;           // determines whether or not the main game loop should continue
-extern char message_str[64];   // onscreen message string
+extern char *message_str;      // onscreen message string
 extern int message_time;       // the time before a message will disappear
+extern int message_y;          // the vertical position of the game messages
 extern unsigned long cycles;   // number of cycles the game has been running
 
 // collision variables
@@ -214,6 +215,7 @@ extern void g_Close(void);
 // interface functions
 extern void i_PrintText( SDL_Surface *font_bmp, int x, int y, char *fmt, ... );
 extern void i_Message( char *fmt, ... );
+extern void i_PrintMessages(void);
 extern void i_GetFrameRate(void);
 extern void i_ReceiveInput(void);
 

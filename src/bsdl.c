@@ -30,8 +30,9 @@ SDL_Event event;
 long fps = 0;             // frames per second
 double t, ot, timesync;   // used to calculate speed of last frame
 int gameloop;             // determines whether or not the main game loop should continue
-char message_str[64];     // onscreen message string
+char *message_str;        // onscreen message string
 int message_time;         // the time before a message will disappear
+int message_y;            // the vertical position of the game messages
 unsigned long cycles = 0; // number of cycles the game has been running
 
 // collision variables

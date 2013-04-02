@@ -58,11 +58,8 @@ int main( int argc, char **argv ) {
 		r_DrawWeapons();
 		
 		// interface
-		if( message_time > 0 ) {
-			i_PrintText( font16_bmp, 4, 4, "%s", message_str );
-			message_time -= timesync;
-		}
-		i_PrintText( font8_bmp, 4, yres-20, "FPS: %d", fps );
+		i_PrintMessages();
+		i_PrintText( font8_bmp, 4, yres-20, "FPS: %d", fps ); // fps counter
 		
 		// blit screen to screen2 (faster than locking/unlocking screen)
 		SDL_BlitSurface(screen, &src, screen2, &dest);
