@@ -214,11 +214,16 @@ void e_ActPlayer(entity_t *my) {
 	// toggle music
 	if( keystatus[SDLK_m] ) {
 		keystatus[SDLK_m] = 0;
-		if(musicplaying)
+		if(musicplaying) {
 			Mix_HaltMusic();
-		else
-			Mix_PlayMusic(music, -1);
-		musicplaying=(musicplaying==0);
+			musicplaying=0;
+		}
+		else {
+			x = Mix_PlayMusic(music, -1);
+			i_Message( "Mix_PlayMusic: %d", x);
+			if( x > 0 )
+				musicplaying=1;
+		}
 	}
 	
 	run = (keystatus[SDLK_LSHIFT]+1);
