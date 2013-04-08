@@ -102,9 +102,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 		ftop2 = min(max(ftop2,0),yres);
 		for( sy=ftop1; sy<ftop2; sy++ ) {
 			index=inx+iny*map.width;
-			if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
-				floorbuffer[sy][sx][0] = map.ceilings[index];
-				floorbuffer[sy][sx][1] = map.ceilings_tex2[index];
+			if( floorbuffer[sy+sx*yres] == 16383 && map.ceilings[index] != map.floors[index] ) {
+				floorbuffer[sy+sx*yres] = map.ceilings[index];
+				floorbuffer[sy+sx*yres+vidsize] = map.ceilings_tex2[index];
 				rowbuffer[sy] = 1;
 			}
 		}
@@ -115,9 +115,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 		ftop2 = min(max(ftop2,0),yres);
 		for( sy=ftop2; sy<ftop1; sy++ ) {
 			index=inx+iny*map.width;
-			if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
-				floorbuffer[sy][sx][0] = map.floors[index];
-				floorbuffer[sy][sx][1] = map.floors_tex2[index];
+			if( floorbuffer[sy+sx*yres] == 16383 && map.ceilings[index] != map.floors[index] ) {
+				floorbuffer[sy+sx*yres] = map.floors[index];
+				floorbuffer[sy+sx*yres+vidsize] = map.floors_tex2[index];
 				rowbuffer[sy] = 1;
 			}
 		}
@@ -160,9 +160,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 					ftop2 = min(max(ftop2,0),yres);
 					for( sy=ftop1; sy<ftop2; sy++ ) {
 						index=inx+iny*map.width;
-						if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
-							floorbuffer[sy][sx][0] = map.ceilings[index];
-							floorbuffer[sy][sx][1] = map.ceilings_tex2[index];
+						if( floorbuffer[sy+sx*yres] == 16383 && map.ceilings[index] != map.floors[index] ) {
+							floorbuffer[sy+sx*yres] = map.ceilings[index];
+							floorbuffer[sy+sx*yres+vidsize] = map.ceilings_tex2[index];
 							rowbuffer[sy] = 1;
 						}
 					}
@@ -172,9 +172,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 					ftop2 = min(max(ftop2,0),yres);
 					for( sy=ftop1; sy<ftop2; sy++ ) {
 						index=inx+iny*map.width;
-						if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
-							floorbuffer[sy][sx][0] = map.ceilings[index];
-							floorbuffer[sy][sx][1] = map.ceilings_tex2[index];
+						if( floorbuffer[sy+sx*yres] == 16383 && map.ceilings[index] != map.floors[index] ) {
+							floorbuffer[sy+sx*yres] = map.ceilings[index];
+							floorbuffer[sy+sx*yres+vidsize] = map.ceilings_tex2[index];
 							rowbuffer[sy] = 1;
 						}
 					}
@@ -219,7 +219,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 								"and	ty, eax\n"
 							);*/
 							
-							if( zbuffer[sy][sx] == 0 || zbuffer[sy][sx] > d ) { // draw onto the screen and the zbuffer
+							if( zbuffer[sy+sx*yres] == 0 || zbuffer[sy+sx*yres] > d ) { // draw onto the screen and the zbuffer
 								ty = ((int)((sy-ttop)*ftexsize))&(walltex->height-1);
 								index = (tx+ty*walltex->width)<<2;
 								r = walltex->data[index];
@@ -247,7 +247,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 								b *= s;
 								
 								*(Uint32 *)((Uint8 *)p + screenindex)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
-								zbuffer[sy][sx] = d; // modify the zbuffer
+								zbuffer[sy+sx*yres] = d; // modify the zbuffer
 							}
 							screenindex += screen->pitch;
 						}
@@ -276,9 +276,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 				ftop2 = min(max(ftop2,0),yres);
 				for( sy=ftop2; sy<ftop1; sy++ ) {
 					index=inx+iny*map.width;
-					if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
-						floorbuffer[sy][sx][0] = map.floors[index];
-						floorbuffer[sy][sx][1] = map.floors_tex2[index];
+					if( floorbuffer[sy+sx*yres] == 16383 && map.ceilings[index] != map.floors[index] ) {
+						floorbuffer[sy+sx*yres] = map.floors[index];
+						floorbuffer[sy+sx*yres+vidsize] = map.floors_tex2[index];
 						rowbuffer[sy] = 1;
 					}
 				}
@@ -288,9 +288,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 				ftop2 = min(max(ftop2,0),yres);
 				for( sy=ftop2; sy<ftop1; sy++ ) {
 					index=inx+iny*map.width;
-					if( floorbuffer[sy][sx][0] == 16383 && map.ceilings[index] != map.floors[index] ) {
-						floorbuffer[sy][sx][0] = map.floors[index];
-						floorbuffer[sy][sx][1] = map.floors_tex2[index];
+					if( floorbuffer[sy+sx*yres] == 16383 && map.ceilings[index] != map.floors[index] ) {
+						floorbuffer[sy+sx*yres] = map.floors[index];
+						floorbuffer[sy+sx*yres+vidsize] = map.floors_tex2[index];
 						rowbuffer[sy] = 1;
 					}
 				}
@@ -339,7 +339,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 							"mov	eax, tomove\n"
 							"and	ty, eax\n"
 						);*/
-						if( zbuffer[sy][sx] == 0 || zbuffer[sy][sx] > d ) { // draw onto the screen and the zbuffer
+						if( zbuffer[sy+sx*yres] == 0 || zbuffer[sy+sx*yres] > d ) { // draw onto the screen and the zbuffer
 							ty = ((int)((sy-ttop)*ftexsize))&(walltex->height-1);
 							index = (tx+ty*walltex->width)<<2;
 							r = walltex->data[index];
@@ -373,7 +373,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 							b *= s;
 							
 							*(Uint32 *)((Uint8 *)p + screenindex)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
-							zbuffer[sy][sx] = d; // modify the zbuffer
+							zbuffer[sy+sx*yres] = d; // modify the zbuffer
 						}
 						screenindex += screen->pitch;
 					}
@@ -428,7 +428,7 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 	vertangle = camHeight + vangle;
 	horizon = vertangle;
 	horizon2 = min(max(horizon,0),yres);
-	invRes = 1.0 / xres;
+	invRes =  1.0 / xres;
 	parallel = 45.0 * PI / 180.0;
 	ox *= 32;
 	oy *= 32;
@@ -444,8 +444,8 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 
 	for(y = 0; y < horizon2; y++) {
 		if( !rowbuffer[y]) continue; // skip this row, it doesn't need to be drawn
-		currentfloor = floorbuffer[y][0][0];
-		d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.925;
+		currentfloor = floorbuffer[y];
+		d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.875;
 		
 		// calculate the coordinates at the periphery of the frustum
 		u1 = cosmparallel * d;
@@ -471,11 +471,11 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 		p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the row we are drawing in
 		
 		for(x = 0; x < xres; x++) {
-			if( floorbuffer[y][x][0] != 16383 ) {
-				if( floorbuffer[y][x][0] != currentfloor || oz-currentfloor>0 ) {
-					currentfloor = floorbuffer[y][x][0];
-					d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.925;
-					if( oz-currentfloor>0 ) {
+			if( floorbuffer[y+x*yres] != 16383 ) {
+				if( floorbuffer[y+x*yres] != currentfloor || oz-currentfloor>0 ) {
+					currentfloor = floorbuffer[y+x*yres];
+					d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.875;
+					if(oz>currentfloor) {
 						tU += dU;
 						tV += dV;
 						continue;
@@ -502,11 +502,11 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 					d *= .011;
 					s = pow(darkness,-d)/2;
 				}
-				if( d < zbuffer[ y ][ x ] || !zbuffer[ y ][ x ] ) {
+				if( d < zbuffer[y+x*yres] || !zbuffer[y+x*yres] ) {
 					//flrx=min(max( ((unsigned long)tU)>>5, 0),map.width-1);
 					//flry=min(max( ((unsigned long)tV)>>5, 0),map.height-1);
 					//tex = map.ceilings_tex2[flrx+flry*map.width];
-					tex = floorbuffer[y][x][1];
+					tex = floorbuffer[y+x*yres+vidsize];
 					if( tex >= 0 && tex < texture_num ) {
 						index = ((((unsigned long)tV&(walltex_bmp[tex].height-1))*walltex_bmp[tex].width)+((unsigned long)tU&(walltex_bmp[tex].width-1)))<<2;
 						
@@ -536,7 +536,7 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 						b *= s;
 						
 						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
-						zbuffer[ y ][ x ] = d;
+						zbuffer[y+x*yres] = d;
 					}
 					else
 						drawsky=1;
@@ -554,8 +554,8 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 	
 	for(y = horizon2; y < yres; y++) {
 		if( !rowbuffer[y] ) continue; // skip this row, it doesn't need to be drawn
-		currentfloor = floorbuffer[y][0][0];
-		d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.825;
+		currentfloor = floorbuffer[y];
+		d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.875;
 		
 		// calculate the coordinates at the periphery of the frustum
 		u1 = cosmparallel * d;
@@ -581,11 +581,11 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 		p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the row we are drawing in
 		
 		for(x = 0; x < xres; x++) {
-			if( floorbuffer[y][x][0] != 16383 ) {
-				if( floorbuffer[y][x][0] != currentfloor || oz-currentfloor<0 ) {
-					currentfloor = floorbuffer[y][x][0];
-					d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.825;
-					if( oz-currentfloor<0 ) {
+			if( floorbuffer[y+x*yres] != 16383 ) {
+				if( floorbuffer[y+x*yres] != currentfloor || oz-currentfloor<0 ) {
+					currentfloor = floorbuffer[y+x*yres];
+					d = (camHeight / (y - vertangle)) * (oz-currentfloor) * 1.875;
+					if(oz<currentfloor) {
 						tU += dU;
 						tV += dV;
 						continue;
@@ -612,11 +612,11 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 					d *= .011;
 					s = pow(darkness,-d);
 				}
-				if( d < zbuffer[ y ][ x ] || !zbuffer[ y ][ x ] ) {
+				if( d < zbuffer[y+x*yres] || !zbuffer[y+x*yres] ) {
 					//flrx=min(max( ((unsigned long)tU)>>5, 0),map.width-1);
 					//flry=min(max( ((unsigned long)tV)>>5, 0),map.height-1);
 					//tex = map.floors_tex2[flrx+flry*map.width];
-					tex = floorbuffer[y][x][1];
+					tex = floorbuffer[y+x*yres+vidsize];
 					if( tex >= 0 && tex < texture_num ) {
 						index = ((((unsigned long)tV&(walltex_bmp[tex].height-1))*walltex_bmp[tex].width)+((unsigned long)tU&(walltex_bmp[tex].width-1)))<<2;
 						
@@ -644,7 +644,7 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 						b *= s;
 						
 						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
-						zbuffer[ y ][ x ] = d;
+						zbuffer[y+x*yres] = d;
 					}
 					else
 						drawsky=1;
@@ -736,7 +736,7 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle ) 
 			picy = (y-y1)*sizefactor;
 			screenindex=x3*screen->format->BytesPerPixel;
 			for( x=x3; x<x4; x++ ) {
-				if( zbuffer[y][x] >= d || !zbuffer[y][x] ) {
+				if( zbuffer[y+x*yres] >= d || !zbuffer[y+x*yres] ) {
 					picx = (x-x1)*sizefactor;
 					/*asm (
 					"fld	$0,$d\n"
@@ -782,7 +782,7 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle ) 
 								"fimul b\n"
 								"fistp b\n"
 							);*/
-							zbuffer[y][x] = d;
+							zbuffer[y+x*yres] = d;
 							//SDL_PutPixel( screen, x, y, SDL_MapRGB( screen->format, r, g, b ) );
 							*(Uint32 *)((Uint8 *)p + screenindex)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						}

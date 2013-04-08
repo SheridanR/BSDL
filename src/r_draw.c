@@ -89,28 +89,29 @@ int sway, swingmode;
 double swing;
 
 void r_DrawWeapons(void) {
-	float screenfactor;
+	float screenfactorx, screenfactory;
 	long x, y, index;
 	long picx, picy, size;
 	long x1, y1, x2, y2, x3, y3, x4, y4;
 	Uint8 r, g, b;
 	Uint8 *p;
-	bitmap_t *gun_bmp;
+	bitmap_t *gun_bmp = NULL;
 	
 	// move the images differently depending upon the screen size
-	screenfactor = ((float)(xres))/320.0;
+	screenfactorx = ((float)(xres))/320.0;
+	screenfactory = ((float)(yres))/240.0;
 	
 	// select the bitmap and generate the offset
 	switch( selected_weapon ) {
 		case 2:
 			gun_bmp = &pistol_bmp[weap_anim];
 			gunx = xres/2;
-			guny = yres-(gun_bmp->height)*screenfactor;
+			guny = yres-(gun_bmp->height)*screenfactory;
 			break;
 		case 3:
 			gun_bmp = &shotgun_bmp[weap_anim];
 			gunx = xres/2;
-			guny = yres-(gun_bmp->height)*screenfactor;
+			guny = yres-(gun_bmp->height)*screenfactory;
 			break;
 	}
 	size = gun_bmp->width*gun_bmp->height;
@@ -132,17 +133,17 @@ void r_DrawWeapons(void) {
 	sway *= max(1-.01*timesync,0);
 	if(!weap_anim) {
 		gunx += sway*cos(swing*PI/180)*.25;
-		guny += (weap_swap[0]+4)*screenfactor+sway*sin(swing*PI/180)*.25;
+		guny += (weap_swap[0]+4)*screenfactory+sway*sin(swing*PI/180)*.25;
 	}
 	else {
 		gunx += sway*cos(swing*PI/180)*.125;
-		guny += (weap_swap[0]+4)*screenfactor+sway*sin(swing*PI/180)*.125;
+		guny += (weap_swap[0]+4)*screenfactory+sway*sin(swing*PI/180)*.125;
 	}
 	
-	x1 = gunx-(gun_bmp->width*screenfactor*.5);
-	x2 = gunx+(gun_bmp->width*screenfactor*.5);
+	x1 = gunx-(gun_bmp->width*screenfactorx*.5);
+	x2 = gunx+(gun_bmp->width*screenfactorx*.5);
 	y1 = guny;
-	y2 = guny+(gun_bmp->height*screenfactor);
+	y2 = guny+(gun_bmp->height*screenfactory);
 	
 	// draw the weapon
 	x3=max(x1,0);
@@ -151,9 +152,9 @@ void r_DrawWeapons(void) {
 	y4=min(y2,yres);
 	for( y=y3; y<y4; y++ ) {
 		p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the column we are drawing in
-		picy = (y-y1)/screenfactor;
+		picy = (y-y1)/screenfactory;
 		for( x=x3; x<x4; x++ ) {
-			picx = (x-x1)/screenfactor;
+			picx = (x-x1)/screenfactorx;
 			index = (picx+picy*gun_bmp->width);
 			if( index >= 0 && index < size ) {
 				index *= 4;

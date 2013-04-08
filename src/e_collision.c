@@ -132,7 +132,7 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 	//fh = map.floors[fx+fy*map.width];
 	//ch = map.ceilings[fx+fy*map.width];
 
-	*z=min(max((tz+vz),gfh-me->sizez),gch);
+	*z=min(max((tz+vz),gfh-STEPHEI),gch);
 	if(*z <= gfh) { // on ground?
 		if( !me->onground2 ) { // landing from a fall?
 			*z=gfh;
@@ -250,6 +250,7 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, dou
 	double dincx, dval0, dincy, dval1;
 	double d;
 	double d2;
+	double vertfactor;
 	
 	posx=floor(x1); posy=floor(y1); // integer coordinates
 	fracx=x1-posx; fracy=y1-posy; // fraction coordinates
@@ -258,6 +259,7 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, dou
 	rx = cosang*2.0;
 	ry = sinang*2.0;
 	d = 1.0/hz; cosang *= d; sinang *= d; ix=0; iy=0;
+	vertfactor = 480.0/yres;
 
 	inx=posx; iny=posy; inz=z1;
 	inx2=inx; iny2=iny;
@@ -279,7 +281,7 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, dou
 		
 		ix = x1 + rx*d;
 		iy = y1 + ry*d;
-		inz += (vangle/4.5)*(d-d2);
+		inz += (vangle/4.5*vertfactor)*(d-d2);
 		
 		// check against the map
 		if( map.floors[inx+iny*map.width] >= map.ceilings[inx+iny*map.width] ) break;

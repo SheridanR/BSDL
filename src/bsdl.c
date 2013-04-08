@@ -45,6 +45,8 @@ entity_t *player;
 double vx, vy, vz, va, la;        // player velocities
 double bob1, bob2, bob3;          // controls camera bobbing
 int run;                          // determines whether or not the player is running
+int noclip=0;
+int fly=0;
 
 // camera variables
 double camx;
@@ -52,6 +54,7 @@ double camy;
 int camz;
 double camang;
 int vang;
+int thirdperson=0;
 
 int selected_weapon = 2; // currently selected weapon
 unsigned int weap_anim = 0;
@@ -65,13 +68,19 @@ unsigned int num_ents=0;
 
 SDL_Surface *screen, *screen2;
 
+// default resolution
+int xres = 640;
+int yres = 480;
+int vidsize = 307200; // xres*yres
+int windowed = 0; // determines whether the engine will run in a window or not
+
 float darkness = 1.1; // depth shading strength; higher number = more darkness
 
 int hx, hy, hz;                   // view aspect ratios
-float zbuffer[yres][xres];        // used to sort objects front to back
-int floorbuffer[yres][xres][2];   // holds information that will be used to draw floors
-int floorbuffer_s[yres][xres][2]; // holds information that will be used to draw floors
-char rowbuffer[yres];             // used to determine which floor/ceiling rows need to be drawn
+float *zbuffer;        // used to sort objects front to back
+int *floorbuffer;   // holds information that will be used to draw floors
+int *floorbuffer_s; // holds information that will be used to draw floors
+char *rowbuffer;             // used to determine which floor/ceiling rows need to be drawn
 int drawsky;                      // used to clip the sky to regions of the screen where it needs to be drawn
 
 double sprsize; // used to resize sprites correctly regardless of resolution

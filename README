@@ -22,28 +22,41 @@ Welcome to Bubbenstein/SDL (aka BSDL)!
 
 I personally have a makeshift world editor to make game maps, but the interface is nasty, the code is ugly, and the thingy can only be built on Linux. I'd be willing to pass any interested person some builds/code if they really wanted it, but to tell the truth, I'd be far more interested if said person were willing to work with me to build a new set of tools from scratch. :)
 
------ HOW TO USE -----
+----- ARGUMENTS -----
 
-The core engine is still in a basic state right now. If you start it up without any arguments, it will load "testmap.bsm". You can pass other filenames to the engine to have it load different maps. This is possible both at the command line and by dragging and dropping the map files to the engine in Windows.
+A selection of arguments can be passed to the BSDL executable file which will modify the way it initializes the game engine.
+-w#				-	Specifies horizontal screen resolution, where # is a number (320 is minimum)
+-h#				-	Specifies vertical screen resolution, where # is a number (200 is minimum)
+-windowed			-	Specifies that the engine will run in a window rather than fullscreen mode
 
-Here are the controls for the game:
+Arguments can be typed in any order, and later arguments will override previous arguments of the same type.
 
-Escape			-	Close the program
-W, A, S, D		-	Move forward, left, backwards, and right, respectively
-Shift			-	Speed movement modifier
+Any argument that does not use the above prefixes will be interpreted as the filename of a .bsm map file which you wish to load.
+
+Example (also default):
+bsdl -w640 -h480 testmap.bsm
+
+The above command starts BSDL at a screen resolution of 640x480 and loads the "testmap.bsm" level.
+
+----- IN-GAME CONTROLS -----
+
+Escape				-	Close the program
+W, A, S, D			-	Move forward, left, backwards, and right, respectively
+E, Q				-	Move up and down (only relevant when fly mode is active)
+Shift				-	Speed movement modifier
 Alt				-	Strafe movement modifier
-Space			-	Jump key
-Mouse			-	Look up, down, left, and right
-Mouse Button 0		-	Attack
+Space				-	Jump key
+Mouse				-	Look up, down, left, and right
+Mouse Button 0			-	Attack
 F6				-	Throw a screenshot to the "shots" folder
-N				-	Activates "noclip" as long as the key is pressed
-P				-	Suspends the camera as long as the key is pressed
+N				-	Toggles noclip+fly mode (reports status)
+P				-	Toggles thirdperson mode (reports status)
 I				-	Spawn an actor
-K				-	Report the player's position
-G				-	Genocide troopers
+K				-	Print the value contained in some variables
+G				-	Genocide all actors
 0-9				-	Select weapon
-B				-	Test sound effect
-M				-	Toggle music
+B				-	Test sound effect (reports result)
+M				-	Toggle music (reports result)
 
 ----- CONTACT -----
 

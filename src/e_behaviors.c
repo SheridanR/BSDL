@@ -191,7 +191,6 @@ void e_ActChar(entity_t *my) {
 void e_ActPlayer(entity_t *my) {
 	double f, s, v, turn, look;
 	double co, si;
-	int fly = 0;
 	double opx, opy;
 	int opz;
 	int x;
@@ -199,10 +198,31 @@ void e_ActPlayer(entity_t *my) {
 	float dir;
 	float offset;
 	
+	// toggle thirdperson
+	if( keystatus[SDLK_p] ) {
+		keystatus[SDLK_p] = 0;
+		thirdperson=(thirdperson==0);
+		if( thirdperson )
+			i_Message("Thirdperson camera activated");
+		else
+			i_Message("Thirdperson camera deactivated");
+	}
+	
+	// toggle noclip
+	if( keystatus[SDLK_n] ) {
+		keystatus[SDLK_n] = 0;
+		noclip=(noclip==0);
+		fly=(fly==0);
+		if( noclip )
+			i_Message("noclip on");
+		else
+			i_Message("noclip off");
+	}
+	
 	// report position
 	if( keystatus[SDLK_k] ) {
 		keystatus[SDLK_k] = 0;
-		i_Message( "X=%d Y=%d Z=%d\nAng=%f", (int)floor(my->x), (int)floor(my->y), my->z, my->ang );
+		i_Message( "X=%d Y=%d Z=%d\nAng=%f\nVang=%d\nxres=%d\nyres=%d", (int)floor(my->x), (int)floor(my->y), my->z, my->ang, vang, xres, yres );
 	}
 	
 	// play sound effect
@@ -221,7 +241,7 @@ void e_ActPlayer(entity_t *my) {
 		else {
 			x = Mix_PlayMusic(music, -1);
 			i_Message( "Mix_PlayMusic: %d", x);
-			if( x > 0 )
+			if( x == 0 )
 				musicplaying=1;
 		}
 	}
@@ -231,12 +251,12 @@ void e_ActPlayer(entity_t *my) {
 	look = -mousey*run*7;
 	f = (keystatus[SDLK_w]-keystatus[SDLK_s])*run; // forward
 	s = (keystatus[SDLK_d]-keystatus[SDLK_a])*run; // strafe
-	v = (keystatus[SDLK_e]-keystatus[SDLK_q]);
+	v = (keystatus[SDLK_e]-keystatus[SDLK_q])*run; // up/down
 	
 	co = cos(my->ang); si = sin(my->ang);
 	vx += (co*f - si*s)*timesync*.000125;
 	vy += (si*f + co*s)*timesync*.000125;
-	if( fly ) vz = v*timesync/12;
+	if( fly ) vz = v*timesync/25;
 	else {
 		if( !my->onground ) vz += (-1)+min(1-.006*timesync,1);
 		else {
@@ -275,10 +295,13 @@ void e_ActPlayer(entity_t *my) {
 	my->fskill[0] = my->x;
 	my->fskill[1] = my->y;
 	
-	if( keystatus[SDLK_n] ) { // noclip cheat
+	if( noclip ) { // noclip cheat
 		my->x += vx*timesync;
 		my->y += vy*timesync;
 		my->z += vz*timesync;
+		my->x = min(max(1,my->x),map.width-1);
+		my->y = min(max(1,my->y),map.height-1);
+		my->z = min(max(-10000,my->z),10000);
 	} else {
 		opx=my->x+vx*timesync;
 		opy=my->y+vy*timesync;
@@ -318,7 +341,7 @@ void e_ActPlayer(entity_t *my) {
 	if( my->ang < 0 ) my->ang += PI*2;
 	if( la >= 1 || la <= -1 ) 
 		vang += la;
-	x=(yres/240)*114;
+	x=(yres/240.0)*114.0;
 	if( vang > x ) vang = x;
 	if( vang < -x ) vang = -x;
 	if( keystatus[SDLK_END] ) vang = 0;
@@ -415,7 +438,7 @@ void e_ActPlayer(entity_t *my) {
 	my->texture = &sprite_bmp[frame];
 	
 	// move the camera!
-	if( !keystatus[SDLK_p] ) {
+	if( !thirdperson ) {
 		camx = my->x;
 		camy = my->y;
 		camz = my->z+bob2+22;

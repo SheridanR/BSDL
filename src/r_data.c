@@ -27,9 +27,12 @@
 -------------------------------------------------------------------------------*/
 
 void r_ClearBuffers(void) {
-	memset( zbuffer, 0, sizeof(zbuffer) );
-	memcpy( floorbuffer, floorbuffer_s, sizeof(floorbuffer) );
-	memset( rowbuffer, 0, sizeof(rowbuffer) );
+	char c;
+	float f;
+	int i;
+	memset( zbuffer, 0, xres*yres*sizeof(f) );
+	memcpy( floorbuffer, floorbuffer_s, xres*yres*sizeof(i) );
+	memset( rowbuffer, 0, yres*sizeof(c) );
 	drawsky=0;
 }
 

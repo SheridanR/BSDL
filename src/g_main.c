@@ -27,21 +27,47 @@
 -------------------------------------------------------------------------------*/
 
 int main( int argc, char **argv ) {
+	int a;
+	char *maptoload = NULL;
 	SDL_Rect src, dest;
 	
+	// get a new random seed
+	srand(time(0));
+	
+	// read arguments
+	if( argc > 1 && argv[1] != NULL )
+	{
+		for(a=1; a<argc; a++) {
+			if( argv[a] != NULL ) {
+				// set windowed mode
+				if( !strcmp(argv[a], "-windowed") ) {
+					windowed = 1;
+				}
+				// set x resolution
+				else if( !strncmp(argv[a], "-w", 2) ) {
+					xres = max(atoi(argv[a]+2),320);
+				}
+				// set y resolution
+				else if( !strncmp(argv[a], "-h", 2) ) {
+					yres = max(atoi(argv[a]+2),200);
+				}
+				// choose map to load
+				else
+					maptoload = argv[a];
+			}
+		}
+	}
+	vidsize = xres*yres;
 	src.x = 0; dest.x = 0;
 	src.y = 0; dest.y = 0;
 	src.w = xres; dest.w = 0;
 	src.h = yres; dest.h = 0;
 	
-	// get a new random seed
-	srand(time(0));
-	
 	// start the engine
-	if( argc > 1 && argv[1] != NULL )
-		g_Open(argv[1]);
-	else
+	if( maptoload == NULL )
 		g_Open("testmap.bsm");
+	else
+		g_Open(maptoload);
 	
 	while(gameloop) {
 		// run game loop functions
@@ -55,7 +81,8 @@ int main( int argc, char **argv ) {
 		r_DrawColumns( camx, camy, camz, camang, vang );
 		r_DrawFloors( camx, camy, camz, camang, vang );
 		r_DrawSprites( camx, camy, camz, camang, vang );
-		r_DrawWeapons();
+		if( !thirdperson )
+			r_DrawWeapons();
 		
 		// interface
 		i_PrintMessages();

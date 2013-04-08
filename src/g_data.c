@@ -27,6 +27,7 @@
 -------------------------------------------------------------------------------*/
 
 int g_Open( char *file ) {
+	char c; int i; float f;
 	float screenfactor;
 	unsigned long x, y;
 	FILE *fp;
@@ -43,13 +44,19 @@ int g_Open( char *file ) {
 	//src.y=0; dest.y=0;
 	//src.w=1280*screenfactor; dest.w=0;
 	//src.h=468*screenfactor; dest.h=0;
+	
+	// allocate memory for tables
+	zbuffer = (float *) malloc(sizeof(f)*yres*xres);
+	floorbuffer = (int *) malloc(sizeof(i)*yres*xres*2);
+	floorbuffer_s = (int *) malloc(sizeof(i)*yres*xres*2);
+	rowbuffer = (char *) malloc(sizeof(c)*yres);
 
 	// build some tables
 	map.loaded = 0;
 	for( x=0; x<xres; x++ ) {
 		for( y=0; y<yres; y++ ) {
-			floorbuffer_s[y][x][0]=16383;
-			floorbuffer_s[y][x][1]=-1;
+			floorbuffer_s[y+x*yres]=16383;
+			floorbuffer_s[y+x*yres+vidsize]=-1;
 		}
 	}
 
@@ -110,8 +117,8 @@ int g_Open( char *file ) {
 	shotgun_bmp[8] = shotgun_bmp[4];
 
 	// precompute some things
-	sprsize = 2.45*((double)xres/320);
-	texsize = 2.5*((double)xres/320);
+	sprsize = 2.45*((double)yres/240);
+	texsize = 2.5*((double)yres/240);
 
 	// load a map
 	if( strstr(file,".bsm") == NULL )
@@ -192,7 +199,10 @@ int g_Open( char *file ) {
 
 	// create a screen surface
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE,xres,yres,32,0,0,0,0);
-	screen2 = SDL_SetVideoMode( xres, yres, 32, SDL_HWSURFACE | SDL_FULLSCREEN );
+	if( !windowed )
+		screen2 = SDL_SetVideoMode( xres, yres, 32, SDL_HWSURFACE | SDL_FULLSCREEN );
+	else
+		screen2 = SDL_SetVideoMode( xres, yres, 32, SDL_HWSURFACE );
 	if( screen == NULL || screen2 == NULL ) {
 		printf("ERROR: Could not create video surface. Aborting...\n\n");
 		g_Close();
@@ -290,4 +300,10 @@ void g_Close(void) {
 	// close SDL
 	Mix_CloseAudio();
 	SDL_Quit();
+	
+	// free video buffers
+	free(zbuffer);
+	free(floorbuffer);
+	free(floorbuffer_s);
+	free(rowbuffer);
 }

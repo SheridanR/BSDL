@@ -119,6 +119,8 @@ extern entity_t *player;
 extern double vx, vy, vz, va, la;        // player velocities
 extern double bob1, bob2, bob3;          // controls camera bobbing
 extern int run;                          // determines whether or not the player is running
+extern int noclip;
+extern int fly;
 
 // camera variables
 extern double camx;
@@ -126,6 +128,7 @@ extern double camy;
 extern int camz;
 extern double camang;
 extern int vang;
+extern int thirdperson;
 
 extern int selected_weapon; // currently selected weapon
 extern unsigned int weap_anim;
@@ -139,16 +142,18 @@ extern unsigned int num_ents;
 
 extern SDL_Surface *screen, *screen2;
 
-#define xres 640 // window size x
-#define yres 480 // window size y
+extern int xres; // window size x
+extern int yres; // window size y
+extern int vidsize;
+extern int windowed; // determines whether the engine will run in a window or not
 
 extern float darkness; // depth shading strength; higher number = more darkness
 
 extern int hx, hy, hz;                   // view aspect ratios
-extern float zbuffer[yres][xres];        // used to sort objects front to back
-extern int floorbuffer[yres][xres][2];   // holds information that will be used to draw floors
-extern int floorbuffer_s[yres][xres][2]; // holds information that will be used to draw floors
-extern char rowbuffer[yres];             // used to determine which floor/ceiling rows need to be drawn
+extern float *zbuffer;        // used to sort objects front to back
+extern int *floorbuffer;   // holds information that will be used to draw floors
+extern int *floorbuffer_s; // holds information that will be used to draw floors
+extern char *rowbuffer;             // used to determine which floor/ceiling rows need to be drawn
 extern int drawsky;                      // used to clip the sky to regions of the screen where it needs to be drawn
 
 extern double sprsize; // used to resize sprites correctly regardless of resolution
