@@ -102,7 +102,7 @@ extern SDL_Event event;
 extern long fps;               // frames per second      
 extern double t, ot, timesync; // used to calculate speed of last frame
 extern int gameloop;           // determines whether or not the main game loop should continue
-extern char *message_str;      // onscreen message string
+extern char message_str[100];      // onscreen message string
 extern int message_time;       // the time before a message will disappear
 extern int message_y;          // the vertical position of the game messages
 extern unsigned long cycles;   // number of cycles the game has been running

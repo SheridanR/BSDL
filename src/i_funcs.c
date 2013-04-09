@@ -37,13 +37,10 @@ void i_Message( char *fmt, ... ) {
 	vsprintf( str, fmt, argptr );
 	
 	// move the string to the message string
-	if( message_str != NULL)
-		free(message_str);
-	for( c=0; str[c]; c++ )
-		if(str[c]==10) // line feed
-			lines++;
-	message_str = (char *) malloc(sizeof(str[0])*c);
 	strcpy( message_str, str );
+	for( c=0; message_str[c]; c++ )
+		if(message_str[c]==10) // line feed
+			lines++;
 	message_time = 2000;
 	message_y = -font16_bmp->h*lines*10;
 }
