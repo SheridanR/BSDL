@@ -41,7 +41,7 @@ typedef struct bitmap_t {
 // entity structure
 typedef struct entity_t {
 	// VARS
-	double x, y; int z;              // world coordinates
+	double x, y, z;              // world coordinates
 	double ang;                      // entity angle
 	double sizex, sizey; int sizez;  // bounding box size
 	int onground, onground2;         // if 1, the entity is on the ground
@@ -204,10 +204,10 @@ extern void e_ActSplat(entity_t* handle);
 #define CHAR_FALL fskill[7]
 extern void e_ActChar(entity_t* handle);
 extern void e_ActPlayer(entity_t* handle);
-extern int e_CheckCells( double tx, double ty, int tz, entity_t* me );
-extern int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double vz, entity_t* me );
-extern void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2, entity_t* me );
-extern hit_t e_LineTrace( entity_t *my, double x1, double y1, int z1, double angle, double vangle );
+extern int e_CheckCells( double tx, double ty, double tz, entity_t* me );
+extern int e_ClipVelocity( double *x, double *y, double *z, double vx, double vy, double vz, entity_t* me );
+extern void e_MoveTrace( double *x1, double *y1, double *z1, double x2, double y2, double z2, entity_t* me );
+extern hit_t e_LineTrace( entity_t *my, double x1, double y1, double z1, double angle, double vangle );
 extern void e_CheckHit( hit_t hitspot );
 extern void e_FreeAll(void);
 extern void e_CreateEntity(void);

@@ -26,7 +26,7 @@
 
 -------------------------------------------------------------------------------*/
 
-int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
+int e_CheckCells( double tx, double ty, double tz, entity_t* me ) {
 	double sx, sy;
 	float ffx, ffy;
 	long fx, fy;
@@ -79,7 +79,7 @@ int e_CheckCells( double tx, double ty, int tz, entity_t* me ) {
 
 -------------------------------------------------------------------------------*/
 
-int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double vz, entity_t* me ) {
+int e_ClipVelocity( double *x, double *y, double *z, double vx, double vy, double vz, entity_t* me ) {
 	double tx, ty; int tz;
 	long fx, fy;
 	//long fh, ch;
@@ -140,7 +140,7 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 		} else {
 			if(*z < gfh) { // climbing a step?
 				if( stepclimb || gfh-sfh < STEPHEI ) {
-					*z += timesync*.3;
+					*z += timesync*.5;
 					if(*z>gfh) *z=gfh;
 				}
 			}
@@ -162,9 +162,8 @@ int e_ClipVelocity( double *x, double *y, int *z, double vx, double vy, double v
 
 -------------------------------------------------------------------------------*/
 
-void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2, entity_t* me ) {
-	double tracex, tracey, tracex2, tracey2;
-	int tracez, tracez2;
+void e_MoveTrace( double *x1, double *y1, double *z1, double x2, double y2, double z2, entity_t* me ) {
+	double tracex, tracey, tracez, tracex2, tracey2, tracez2;
 	double dx, dy, dxabs, dyabs, x, y;
 	int sdx, sdy, i;
 
@@ -236,7 +235,7 @@ void e_MoveTrace( double *x1, double *y1, int *z1, double x2, double y2, int z2,
 
 -------------------------------------------------------------------------------*/
 
-hit_t e_LineTrace( entity_t *me, double x1, double y1, int z1, double angle, double vangle ) {
+hit_t e_LineTrace( entity_t *me, double x1, double y1, double z1, double angle, double vangle ) {
 	entity_t *entity;
 	hit_t hit;
 	int posx, posy;

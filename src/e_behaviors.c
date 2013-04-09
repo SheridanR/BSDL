@@ -219,10 +219,10 @@ void e_ActPlayer(entity_t *my) {
 			i_Message("noclip off");
 	}
 	
-	// report position
+	// report variable status
 	if( keystatus[SDLK_k] ) {
 		keystatus[SDLK_k] = 0;
-		i_Message( "X=%d Y=%d Z=%d\nAng=%f\nVang=%d\nxres=%d\nyres=%d", (int)floor(my->x), (int)floor(my->y), my->z, my->ang, vang, xres, yres );
+		i_Message( "X=%d Y=%d Z=%d\nAng=%f\nVang=%d\nxres=%d\nyres=%d", (int)floor(my->x), (int)floor(my->y), (int)floor(my->z), my->ang, vang, xres, yres );
 	}
 	
 	// play sound effect
@@ -256,7 +256,7 @@ void e_ActPlayer(entity_t *my) {
 	co = cos(my->ang); si = sin(my->ang);
 	vx += (co*f - si*s)*timesync*.000125;
 	vy += (si*f + co*s)*timesync*.000125;
-	if( fly ) vz = v*timesync/25;
+	if( fly ) vz = v*.35;
 	else {
 		if( !my->onground ) vz += (-1)+min(1-.006*timesync,1);
 		else {
@@ -271,7 +271,7 @@ void e_ActPlayer(entity_t *my) {
 	va += turn;
 	la += look;
 	f = max(1-.01*timesync,0);
-	vx*=f; vy*=f; va*=f*.25; la*=f*.25;
+	vx*=f; vy*=f; if(fly) vz*=f; va*=f*.25; la*=f*.25;
 	
 	if( keystatus[SDLK_i] ) { // insert a sprite
 		keystatus[SDLK_i] = 0;
