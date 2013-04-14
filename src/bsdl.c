@@ -58,6 +58,7 @@ int thirdperson=0;
 
 int selected_weapon = 2; // currently selected weapon
 unsigned int weap_anim = 0;
+int weap_sound = 0;
 int gunx, guny;
 int weap_swap[3];
 int weap_skill[3];

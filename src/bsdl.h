@@ -132,6 +132,7 @@ extern int thirdperson;
 
 extern int selected_weapon; // currently selected weapon
 extern unsigned int weap_anim;
+extern int weap_sound;
 extern int gunx, guny;
 extern int weap_swap[3];
 extern int weap_skill[3];

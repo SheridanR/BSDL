@@ -369,6 +369,15 @@ void e_ActPlayer(entity_t *my) {
 			}
 		}
 		
+		// make special animation sounds
+		if( weap_anim == 0 )
+			weap_sound = 0;
+		if( selected_weapon == 3 )
+			if( weap_anim >= 5 && weap_sound == 0 ) {
+				weap_sound = 1;
+				a_EntitySound(my,sounds[5],64);
+			}
+		
 		// refire is available
 		if( !mousestatus[SDL_BUTTON_LEFT] )
 			my->flags &= ~(FLAG_UNUSED1);
@@ -431,8 +440,23 @@ void e_ActPlayer(entity_t *my) {
 	while( dir < 0 )
 		dir += PI*2;
 	
-	my->fskill[2] += sqrt( pow(my->x - my->fskill[0],2) + pow(my->y - my->fskill[1],2) )*2;
-	if( my->fskill[2] >= 4 ) my->fskill[2] = 0;
+	if( weap_anim == 0 ) {
+		my->fskill[2] += sqrt( pow(my->x - my->fskill[0],2) + pow(my->y - my->fskill[1],2) )*2;
+		if( my->fskill[2] >= 4 ) my->fskill[2] = 0;
+	}
+	if( weap_anim > 0 ) {
+		my->fskill[2] = 4;
+		if( selected_weapon == 2 ) {
+			if( weap_anim > 1 )
+				my->fskill[2] = 5;
+		}
+		if( selected_weapon == 3 ) {
+			if( weap_anim > 1 )
+				my->fskill[2] = 5;
+			if( weap_anim > 3 )
+				my->fskill[2] = 4;
+		}
+	}
 	frame = 1 + 8*(int)floor(my->fskill[2]); // animation
 	frame += (int)floor( dir * 4/PI ); // direction
 	my->texture = &sprite_bmp[frame];
