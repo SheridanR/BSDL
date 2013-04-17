@@ -28,21 +28,24 @@ A selection of arguments can be passed to the BSDL executable file which will mo
 -w#				-	Specifies horizontal screen resolution, where # is a number (320 is minimum)
 -h#				-	Specifies vertical screen resolution, where # is a number (200 is minimum)
 -windowed			-	Specifies that the engine will run in a window rather than fullscreen mode
+-config=xxx.cfg	-	Specifies a user config to use; default.cfg is the default
 
 Arguments can be typed in any order, and later arguments will override previous arguments of the same type.
 
 Any argument that does not use the above prefixes will be interpreted as the filename of a .bsm map file which you wish to load.
 
-Example (also default):
-bsdl -w640 -h480 testmap.bsm
+Example:
+bsdl -w640 -h400 doom.bsm -config=lefty.cfg
 
-The above command starts BSDL at a screen resolution of 640x480 and loads the "testmap.bsm" level.
+The above command starts BSDL at a screen resolution of 640x400 using the "lefty" config and loads the "doom.bsm" level.
 
 ----- IN-GAME CONTROLS -----
 
+The controls can be modified by supplying your own user configs to the BSDL engine. The default is default.cfg, which contains these bindings:
+
 Escape				-	Close the program
 W, A, S, D			-	Move forward, left, backwards, and right, respectively
-E, Q				-	Move up and down (only relevant when fly mode is active)
+E, Q				-	Move up and down (only relevant when fly/noclip mode is active)
 Shift				-	Speed movement modifier
 Alt				-	Strafe movement modifier
 Space				-	Jump key
@@ -57,6 +60,9 @@ G				-	Genocide all actors
 0-9				-	Select weapon
 B				-	Test sound effect (reports result)
 M				-	Toggle music (reports result)
+End				-	Recenters camera's vertical component
+
+Also supplied is a lefty.cfg file which swaps the primary movement controls from W, A, S, D, E, Q to Arrow Keys + Page Up/Down.
 
 ----- CONTACT -----
 

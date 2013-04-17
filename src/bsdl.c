@@ -21,10 +21,14 @@ int sgn( double expr ) {
 	else return(1);
 }
 
-int keystatus[323];
+int keystatus[256]; // sym requires 323
+int in_toggle1, in_toggle2, in_toggle3, in_toggle4, in_toggle5, in_toggle6, in_toggle7; // crap
 int mousestatus[5];
 int mousex, mousey, omousex, omousey;
 SDL_Event event;
+
+// input vars
+int in_commands[17];
 
 // general vars
 long fps = 0;             // frames per second

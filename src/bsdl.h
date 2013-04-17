@@ -10,6 +10,7 @@
 -------------------------------------------------------------------------------*/
 
 #include "SDL.h"
+#include "SDL_keyboard.h"
 #include "sprig.h"
 #include "SDL_mixer.h"
 
@@ -93,10 +94,33 @@ extern entity_t *lastentity;  // last entity in list
 
 extern int sgn( double expr );
 
-extern int keystatus[323];
+extern int keystatus[256]; // sym requires 323
+extern int in_toggle1, in_toggle2, in_toggle3, in_toggle4, in_toggle5, in_toggle6, in_toggle7; // crap
 extern int mousestatus[5];
 extern int mousex, mousey, omousex, omousey;
 extern SDL_Event event;
+
+// input vars
+extern int in_commands[17];
+enum {
+	IN_FORWARD = 0,
+	IN_LEFT = 1,
+	IN_BACK = 2,
+	IN_RIGHT = 3,
+	IN_UP = 4,
+	IN_DOWN = 5,
+	IN_RUN = 6,
+	IN_JUMP = 7,
+	IN_THIRDPERSON = 8,
+	IN_PRINTINFO = 9,
+	IN_NOCLIP = 10,
+	IN_TESTSOUND = 11,
+	IN_TESTMUSIC = 12,
+	IN_CENTERVIEW = 13,
+	IN_SPAWN = 14,
+	IN_KILL = 15,
+	IN_ATTACK = 16,
+};
 
 // general vars
 extern long fps;               // frames per second      
@@ -224,6 +248,8 @@ extern void i_Message( char *fmt, ... );
 extern void i_PrintMessages(void);
 extern void i_GetFrameRate(void);
 extern void i_ReceiveInput(void);
+extern int i_GetStatus(int command);
+extern int i_ReadConfig(char *filename);
 
 // render functions
 extern void r_ClearBuffers(void);

@@ -199,41 +199,45 @@ void e_ActPlayer(entity_t *my) {
 	float offset;
 	
 	// toggle thirdperson
-	if( keystatus[SDLK_p] ) {
-		keystatus[SDLK_p] = 0;
+	if( i_GetStatus(IN_THIRDPERSON) && in_toggle1 ) {
+		in_toggle1 = 0;
 		thirdperson=(thirdperson==0);
 		if( thirdperson )
 			i_Message("Thirdperson camera activated");
 		else
 			i_Message("Thirdperson camera deactivated");
-	}
+	} else if( !i_GetStatus(IN_THIRDPERSON) )
+		in_toggle1=1;
 	
 	// toggle noclip
-	if( keystatus[SDLK_n] ) {
-		keystatus[SDLK_n] = 0;
+	if( i_GetStatus(IN_NOCLIP) && in_toggle2 ) {
+		in_toggle2 = 0;
 		noclip=(noclip==0);
 		fly=(fly==0);
 		if( noclip )
 			i_Message("noclip on");
 		else
 			i_Message("noclip off");
-	}
+	} else if( !i_GetStatus(IN_NOCLIP) )
+		in_toggle2=1;
 	
 	// report variable status
-	if( keystatus[SDLK_k] ) {
-		keystatus[SDLK_k] = 0;
+	if( i_GetStatus(IN_PRINTINFO) && in_toggle3 ) {
+		in_toggle3=0;
 		i_Message( "X=%d Y=%d Z=%d\nAng=%f\nVang=%d\nxres=%d\nyres=%d", (int)floor(my->x), (int)floor(my->y), (int)floor(my->z), my->ang, vang, xres, yres );
-	}
+	} else if( !i_GetStatus(IN_PRINTINFO) )
+		in_toggle3=1;
 	
 	// play sound effect
-	if( keystatus[SDLK_b] ) {
-		keystatus[SDLK_b] = 0;
+	if( i_GetStatus(IN_TESTSOUND) && in_toggle4 ) {
+		in_toggle4=0;
 		i_Message( "Mix_PlayChannel: %d", Mix_PlayChannel(-1, sounds[0], 0));
-	}
+	} else if( !i_GetStatus(IN_TESTSOUND) )
+		in_toggle4=1;
 	
 	// toggle music
-	if( keystatus[SDLK_m] ) {
-		keystatus[SDLK_m] = 0;
+	if( i_GetStatus(IN_TESTMUSIC) && in_toggle5 ) {
+		in_toggle5=0;
 		if(musicplaying) {
 			Mix_HaltMusic();
 			musicplaying=0;
@@ -244,14 +248,15 @@ void e_ActPlayer(entity_t *my) {
 			if( x == 0 )
 				musicplaying=1;
 		}
-	}
+	} else if( !i_GetStatus(IN_TESTMUSIC) )
+		in_toggle5=1;
 	
-	run = (keystatus[SDLK_LSHIFT]+1);
+	run = (i_GetStatus(IN_RUN)+1);
 	turn = mousex*run*.05;
 	look = -mousey*run*7;
-	f = (keystatus[SDLK_w]-keystatus[SDLK_s])*run; // forward
-	s = (keystatus[SDLK_d]-keystatus[SDLK_a])*run; // strafe
-	v = (keystatus[SDLK_e]-keystatus[SDLK_q])*run; // up/down
+	f = (i_GetStatus(IN_FORWARD)-i_GetStatus(IN_BACK))*run; // forward
+	s = (i_GetStatus(IN_RIGHT)-i_GetStatus(IN_LEFT))*run; // strafe
+	v = (i_GetStatus(IN_UP)-i_GetStatus(IN_DOWN))*run; // up/down
 	
 	co = cos(my->ang); si = sin(my->ang);
 	vx += (co*f - si*s)*timesync*.000125;
@@ -260,7 +265,7 @@ void e_ActPlayer(entity_t *my) {
 	else {
 		if( !my->onground ) vz += (-1)+min(1-.006*timesync,1);
 		else {
-			if( !keystatus[SDLK_SPACE] )
+			if( !i_GetStatus(IN_JUMP) )
 				vz = 0;
 			else {
 				vz = .5;
@@ -273,8 +278,8 @@ void e_ActPlayer(entity_t *my) {
 	f = max(1-.01*timesync,0);
 	vx*=f; vy*=f; if(fly) vz*=f; va*=f*.25; la*=f*.25;
 	
-	if( keystatus[SDLK_i] ) { // insert a sprite
-		keystatus[SDLK_i] = 0;
+	if( i_GetStatus(IN_SPAWN) && in_toggle6 ) { // insert a sprite
+		in_toggle6=0;
 		e_CreateEntity();
 		lastentity->behavior = &e_ActChar;
 		lastentity->texture = &sprite_bmp[1];
@@ -289,7 +294,8 @@ void e_ActPlayer(entity_t *my) {
 		lastentity->ang=player->ang;
 		
 		lastentity->CHAR_HEALTH = 100;
-	}
+	} else if( !i_GetStatus(IN_SPAWN) )
+		in_toggle6=1;
 	
 	// my old position
 	my->fskill[0] = my->x;
@@ -312,7 +318,7 @@ void e_ActPlayer(entity_t *my) {
 	}
 	
 	if( my->onground ) {
-		if( keystatus[SDLK_w] || keystatus[SDLK_s] || keystatus[SDLK_a] || keystatus[SDLK_d] ) {
+		if( i_GetStatus(IN_FORWARD) || i_GetStatus(IN_LEFT) || i_GetStatus(IN_BACK) || i_GetStatus(IN_RIGHT) ) {
 			bob1 += bob3*timesync/48;
 			bob1 *= f;
 			bob2 += bob1*timesync/12;
@@ -344,7 +350,7 @@ void e_ActPlayer(entity_t *my) {
 	x=(yres/240.0)*114.0;
 	if( vang > x ) vang = x;
 	if( vang < -x ) vang = -x;
-	if( keystatus[SDLK_END] ) vang = 0;
+	if( i_GetStatus(IN_CENTERVIEW) ) vang = 0;
 	
 	// movement code ends
 	
@@ -354,7 +360,7 @@ void e_ActPlayer(entity_t *my) {
 	}
 	if( weap_swap[2] == 0 ) {
 		// fire the weapon
-		if( mousestatus[SDL_BUTTON_LEFT] && weap_skill[2] <= 0 && !(my->flags&FLAG_UNUSED1) ) {
+		if( i_GetStatus(IN_ATTACK) && weap_skill[2] <= 0 && !(my->flags&FLAG_UNUSED1) ) {
 			darkness = 1.02;
 			weap_anim = 1;
 			my->flags |= FLAG_UNUSED1; // holding the trigger
@@ -379,14 +385,14 @@ void e_ActPlayer(entity_t *my) {
 			}
 		
 		// refire is available
-		if( !mousestatus[SDL_BUTTON_LEFT] )
+		if( !i_GetStatus(IN_ATTACK) )
 			my->flags &= ~(FLAG_UNUSED1);
 		
 		if( weap_anim == 0 ) {
 			// number keys to change weapons
-			if( keystatus[SDLK_2] && selected_weapon != 2 )
+			if( keystatus[3] && selected_weapon != 2 )
 				weap_swap[2] = 2;
-			else if( keystatus[SDLK_3] && selected_weapon != 3 )
+			else if( keystatus[4] && selected_weapon != 3 )
 				weap_swap[2] = 3;
 		}
 	}
@@ -471,7 +477,7 @@ void e_ActPlayer(entity_t *my) {
 	
 	// kill troops
 	entity_t *entity;
-	if( keystatus[SDLK_g] )
+	if( i_GetStatus(IN_KILL) )
 		for( entity=firstentity; entity!=NULL; entity=entity->next) {
 			if( entity->behavior == &e_ActChar )
 				entity->CHAR_HEALTH = 0;

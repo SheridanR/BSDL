@@ -29,6 +29,7 @@
 int main( int argc, char **argv ) {
 	int a;
 	char *maptoload = NULL;
+	char *configtoload = NULL;
 	SDL_Rect src, dest;
 	
 	// get a new random seed
@@ -51,6 +52,10 @@ int main( int argc, char **argv ) {
 				else if( !strncmp(argv[a], "-h", 2) ) {
 					yres = max(atoi(argv[a]+2),200);
 				}
+				// set config file to read
+				else if( !strncmp(argv[a], "-config=", 8) ) {
+					configtoload = argv[a]+8;
+				}
 				// choose map to load
 				else
 					maptoload = argv[a];
@@ -62,6 +67,12 @@ int main( int argc, char **argv ) {
 	src.y = 0; dest.y = 0;
 	src.w = xres; dest.w = 0;
 	src.h = yres; dest.h = 0;
+	
+	// read the config file
+	if( configtoload == NULL)
+		i_ReadConfig("default.cfg");
+	else
+		i_ReadConfig(configtoload);
 	
 	// start the engine
 	if( maptoload == NULL )

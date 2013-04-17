@@ -118,7 +118,7 @@ void r_DrawWeapons(void) {
 	//gunx += bob2*screenfactor;
 	//guny += (24+bob2+weap_swap[0])*screenfactor+vang*.05;
 	
-	if( keystatus[SDLK_w] || keystatus[SDLK_a] || keystatus[SDLK_s] || keystatus[SDLK_d] ) {
+	if( i_GetStatus(IN_FORWARD) || i_GetStatus(IN_LEFT) || i_GetStatus(IN_BACK) || i_GetStatus(IN_RIGHT) ) {
 		if( swing < 0 ) {
 			swingmode = 0;
 			swing = 0;
