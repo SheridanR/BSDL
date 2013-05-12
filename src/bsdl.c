@@ -28,7 +28,7 @@ int mousex, mousey, omousex, omousey;
 SDL_Event event;
 
 // input vars
-int in_commands[17];
+int in_commands[TOTAL_COMMANDS];
 
 // general vars
 long fps = 0;             // frames per second
@@ -39,6 +39,18 @@ int message_time;         // the time before a message will disappear
 int message_y;            // the vertical position of the game messages
 unsigned long cycles = 0; // number of cycles the game has been running
 
+// multiplayer vars
+IPaddress ip, *remoteIP;
+UDPsocket sd, csd;
+UDPpacket *packet;
+int server=0;
+int client=0;
+char *address=NULL; // ip address to the server
+int dialing=0;
+int client_input[TOTAL_COMMANDS];
+int client_keystatus[256]; // sym requires 323
+int client_mousestatus[5];
+
 // collision variables
 int gfh, gch;
 int stepclimb, sfh;
@@ -46,7 +58,6 @@ double targetx, targety; int targetz;
 
 // player definitions
 entity_t *player;
-double vx, vy, vz, va, la;        // player velocities
 double bob1, bob2, bob3;          // controls camera bobbing
 int run;                          // determines whether or not the player is running
 int noclip=0;
@@ -66,6 +77,8 @@ int weap_sound = 0;
 int gunx, guny;
 int weap_swap[3];
 int weap_skill[3];
+int weap_mag[9];
+int weap_ammo[9];
 
 // game world
 map_t map;
@@ -81,19 +94,20 @@ int windowed = 0; // determines whether the engine will run in a window or not
 
 float darkness = 1.1; // depth shading strength; higher number = more darkness
 
-int hx, hy, hz;                   // view aspect ratios
-float *zbuffer;        // used to sort objects front to back
+int hx, hy, hz;     // view aspect ratios
+float *zbuffer;     // used to sort objects front to back
 int *floorbuffer;   // holds information that will be used to draw floors
 int *floorbuffer_s; // holds information that will be used to draw floors
-char *rowbuffer;             // used to determine which floor/ceiling rows need to be drawn
-int drawsky;                      // used to clip the sky to regions of the screen where it needs to be drawn
+char *rowbuffer;    // used to determine which floor/ceiling rows need to be drawn
+int drawsky;        // used to clip the sky to regions of the screen where it needs to be drawn
 
 double sprsize; // used to resize sprites correctly regardless of resolution
 double texsize; // same, only for walls
 
-// the font bitmap
+// interface bitmaps
 SDL_Surface *font8_bmp;
 SDL_Surface *font16_bmp;
+bitmap_t console_bmp;
 
 // wall textures
 unsigned int texture_num;
@@ -107,7 +121,7 @@ bitmap_t *sprite_bmp;
 
 // weapon textures
 bitmap_t pistol_bmp[5];
-bitmap_t shotgun_bmp[9];
+bitmap_t shotgun_bmp[12];
 
 // sound effects (uses SDL_mixer)
 int audio_rate = 22050;

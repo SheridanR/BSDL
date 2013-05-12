@@ -9,13 +9,6 @@
 	
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------
@@ -60,11 +53,12 @@ int g_Open( char *file ) {
 		}
 	}
 
-	// load generalbitmaps
+	// load general bitmaps
 	font8_bmp = SDL_LoadBMP("images/8font.bmp");
 	SDL_SetColorKey( font8_bmp, SDL_SRCCOLORKEY, SDL_MapRGB( font8_bmp->format, 255, 0, 255 ) );
 	font16_bmp = SDL_LoadBMP("images/16font.bmp");
 	SDL_SetColorKey( font16_bmp, SDL_SRCCOLORKEY, SDL_MapRGB( font16_bmp->format, 255, 0, 255 ) );
+	r_LoadBmp("images/console.bmp", &console_bmp);
 	
 	// load textures
 	sky2_bmp = SDL_LoadBMP("images/sky.bmp");
@@ -107,14 +101,17 @@ int g_Open( char *file ) {
 	r_LoadBmp( "images/pistol4.bmp", &pistol_bmp[3] );
 	r_LoadBmp( "images/pistol5.bmp", &pistol_bmp[4] );
 	r_LoadBmp( "images/shotgun1.bmp", &shotgun_bmp[0] );
-	r_LoadBmp( "images/shotgun2.bmp", &shotgun_bmp[1] );
+	r_LoadBmp( "images/shotgun3.bmp", &shotgun_bmp[1] );
 	shotgun_bmp[2] = shotgun_bmp[0];
 	shotgun_bmp[3] = shotgun_bmp[0];
-	r_LoadBmp( "images/shotgun3.bmp", &shotgun_bmp[4] );
-	shotgun_bmp[5] = shotgun_bmp[4];
+	shotgun_bmp[4] = shotgun_bmp[0];
+	shotgun_bmp[5] = shotgun_bmp[0];
 	r_LoadBmp( "images/shotgun4.bmp", &shotgun_bmp[6] );
-	shotgun_bmp[7] = shotgun_bmp[4];
-	shotgun_bmp[8] = shotgun_bmp[4];
+	shotgun_bmp[7] = shotgun_bmp[6];
+	r_LoadBmp( "images/shotgun5.bmp", &shotgun_bmp[8] );
+	shotgun_bmp[9] = shotgun_bmp[6];
+	shotgun_bmp[10] = shotgun_bmp[6];
+	r_LoadBmp( "images/shotgun2.bmp", &shotgun_bmp[11] ); // swapped with shotgun[1] when needed
 
 	// precompute some things
 	sprsize = 2.45*((double)yres/240);
@@ -167,22 +164,29 @@ int g_Open( char *file ) {
 	fclose(fp);
 	
 	// spawn the player
-	e_CreateEntity();
-	player = lastentity;
-	player->behavior = &e_ActPlayer;
-	
-	player->sizex = .5;
-	player->sizey = .5;
-	player->sizez = 52;
-	
-	player->x=2.5;
-	player->y=2.5;
-	player->z=0;
-	player->ang=0;
+	if( !server ) {
+		e_CreateEntity();
+		player = lastentity;
+		player->behavior = &e_ActPlayer;
+		
+		player->sizex = .5;
+		player->sizey = .5;
+		player->sizez = 52;
+		
+		player->x=2.5;
+		player->y=2.5;
+		player->z=0;
+		player->ang=0;
+	}
 	vang=0;
-
-	vx=0; vy=0; vz=0; va=0; la=0;
 	bob1 = 0; bob2 = 0; bob3 = 1;
+	weap_mag[2]=2;
+	
+	// set camera
+	camx=8;
+	camy=2.5;
+	camz=0;
+	camang=0;
 
 	// initiate SDL
 	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER ) == -1 ) {
@@ -190,6 +194,7 @@ int g_Open( char *file ) {
 		g_Close();
 		exit(4);
 	}
+	//SDL_WM_GrabInput(SDL_GRAB_ON);
 	
 	// open audio
 	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)) {
@@ -230,12 +235,59 @@ int g_Open( char *file ) {
 	fclose(fp);
 	
 	// load music
-	music = Mix_LoadMUS("music/dead.mid");
+	music = Mix_LoadMUS("music/dead.ogg");
+	Mix_VolumeMusic(64);
 	//Mix_PlayMusic(music, -1);
 	musicplaying=0;
 	
+	// multiplayer
+	if (SDLNet_Init() < 0) {
+		g_Close();
+		printf("ERROR: SDLNet_Init: %s\n", SDLNet_GetError());
+		exit(EXIT_FAILURE);
+	}
+
+	// starting a server
+	if( server ) {
+		// listen on the host's port
+		if( !(sd = SDLNet_UDP_Open(PORT)) ) {
+			g_Close();
+			printf("ERROR: SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+			exit(EXIT_FAILURE);
+		}
+		
+		// Allocate memory for the packet
+		if( !(packet = SDLNet_AllocPacket(512)) ) {
+			printf("ERROR: SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+			exit(EXIT_FAILURE);
+		}
+	}
+	
+	// joining a server
+	else if( address != NULL ) {
+		if( !(sd = SDLNet_UDP_Open(0)) ) {
+			g_Close();
+			printf("ERROR: SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+			exit(EXIT_FAILURE);
+		}
+		
+		if( SDLNet_ResolveHost(&ip, address, PORT) < 0 ) {
+			printf("ERROR: SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+			exit(EXIT_FAILURE);
+		}
+		
+		// Allocate memory for the packet
+		if( !(packet = SDLNet_AllocPacket(512)) ) {
+			printf("ERROR: SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+			exit(EXIT_FAILURE);
+		}
+	}
+	
 	// report a success!
-	i_Message( "Map loaded: %s", file );
+	if( address == NULL )
+		i_Message( "Map loaded: %s", file );
+	else
+		i_Message( "Map loaded: %s\nConnected to %s", file, address );
 	return(0);
 }
 
@@ -277,6 +329,7 @@ void g_Close(void) {
 	// free bitmaps
 	SDL_FreeSurface(font8_bmp);
 	SDL_FreeSurface(font16_bmp);
+	r_FreeBmp( &console_bmp );
 	
 	SDL_FreeSurface(sky_bmp);
 	SDL_FreeSurface(sky2_bmp);
@@ -292,10 +345,18 @@ void g_Close(void) {
 	r_FreeBmp( &pistol_bmp[4] );
 	r_FreeBmp( &shotgun_bmp[0] );
 	r_FreeBmp( &shotgun_bmp[1] );
-	r_FreeBmp( &shotgun_bmp[4] );
 	r_FreeBmp( &shotgun_bmp[6] );
+	r_FreeBmp( &shotgun_bmp[8] );
+	r_FreeBmp( &shotgun_bmp[11] );
 	
 	SDL_FreeSurface(screen);
+	
+	// close down net connections
+	SDLNet_FreePacket(packet);
+	if( address == NULL )
+		SDLNet_UDP_Close(csd);
+	SDLNet_UDP_Close(sd);
+	SDLNet_Quit();
 	
 	// close SDL
 	Mix_CloseAudio();

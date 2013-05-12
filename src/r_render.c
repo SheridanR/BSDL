@@ -9,13 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------
@@ -59,6 +52,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 	// floor/ceiling rendering vars
 	int ftop1, ftop2;
 	int inx2, iny2;
+	int previnx, previny;
 	float d2;
 
 	ty=0; // fixes annoying compiler warning
@@ -111,7 +105,7 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 		
 		// determine floor heights per pixel
 		ftop2 = hy-hei2*(map.floors[inx+iny*map.width]-oz)-1;
-		ftop1 = yres-1;
+		ftop1 = yres;
 		ftop2 = min(max(ftop2,0),yres);
 		for( sy=ftop2; sy<ftop1; sy++ ) {
 			index=inx+iny*map.width;
@@ -123,6 +117,8 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 		}
 		
 		while( d < 64 ) {
+			previnx = inx;
+			previny = iny;
 			if( map.floors[inx+iny*map.width] >= map.ceilings[inx+iny*map.width] ) break;
 			if( dval1>dval0 ) { inx+=dincx; d=dval0; dval0+=arx; side=0; }
 			else { iny+=dincy; d=dval1; dval1+=ary; side=1; }
@@ -197,7 +193,10 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 						tx = tx &(walltex->width-1);
 						
 						// draw ceiling wall slice
-						s=pow(darkness,-d)/(side+1);
+						if( map.ceilings_tex2[previnx+previny*map.width]<0||map.ceilings_tex2[previnx+previny*map.width]>=texture_num )
+							s=1.0/(side+1);
+						else
+							s=pow(darkness,-d)/(side+1);
 						top=max(ttop,top);
 						bottom=min(tbottom,yres);
 						screenindex = top*screen->pitch;
@@ -316,7 +315,10 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 					tx = tx &(walltex->width-1);
 					
 					// draw floor wall slice
-					s=pow(darkness,-d)/(side+1);
+					if( map.ceilings_tex2[previnx+previny*map.width]<0||map.ceilings_tex2[previnx+previny*map.width]>=texture_num )
+						s=1.0/(side+1);
+					else
+						s=pow(darkness,-d)/(side+1);
 					top=max(ttop,0);
 					bottom=min(tbottom,bottom);
 					screenindex=top*screen->pitch;
@@ -365,9 +367,9 @@ void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle ) 
 							/*asm ("fld %1\n\t"
 								"fimul %0\n\t"
 								"fistp %0"
-								: "=p" (r)
-								: "p" (r), "m" (s)
-								: "0");*/
+								: "=&g" (r)
+								: "m" (r), "f" (s)
+								: "0" );*/
 							r *= s;
 							g *= s;
 							b *= s;
@@ -639,9 +641,11 @@ void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle ) {
 							"fimul b\n"
 							"fistp b\n"
 						);*/
-						r *= s;
-						g *= s;
-						b *= s;
+						if( s != 1.0 ) {
+							r *= s;
+							g *= s;
+							b *= s;
+						}
 						
 						*(Uint32 *)((Uint8 *)p)=SDL_MapRGB( screen->format, r, g, b ); // draw a pixel
 						zbuffer[y+x*yres] = d;
@@ -709,7 +713,10 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle ) 
 		if( ay <= 0 ) continue;
 		d *= cos(ax/(d*.5)); // correct the "fishbowl" effect
 		if( d < .05 ) continue; // sprite is too close
-		s = pow(darkness,-d);
+		if( map.ceilings_tex2[(int)(floor(sprites->x)+floor(sprites->y)*map.width)] < 0 || map.ceilings_tex2[(int)(floor(sprites->x)+floor(sprites->y)*map.width)] >= texture_num )
+			s = 1.0;
+		else
+			s = pow(darkness,-d);
 		
 		// get the onscreen position of the sprite
 		sx = (ax*(hx/ay)*-1)+hx; // onscreen position x
@@ -763,12 +770,14 @@ void r_DrawSprites( double ox, double oy, int oz, double angle, double vangle ) 
 						b = sprites->texture->data[index+2];
 						if( r || g<255 || b<255 ) {
 							//*(long *)(screenindex+(x<<2)) = colors;
-							r *= s;
-							g *= s;
-							b *= s;
-							/*asm (
+							if( s != 1.0 ) {
+								r *= s;
+								g *= s;
+								b *= s;
+							}
+							/*asm(
 								//shade the RED component
-								"fld	s\n"
+								"fld	$s\n"
 								"fimul r\n"
 								"fistp r\n"
 								

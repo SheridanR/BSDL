@@ -5,14 +5,16 @@
 	Desc: contains some prototypes as well as various type definitions
 
 	Copyright 2011 (c) Sheridan Rathbun, all rights reserved.
-	See LICENSE.TXT for details.
+	See LICENSE for details.
 
 -------------------------------------------------------------------------------*/
 
+#include <math.h>
+#include <time.h>
 #include "SDL.h"
-#include "SDL_keyboard.h"
 #include "sprig.h"
 #include "SDL_mixer.h"
+#include "SDL_net.h"
 
 // game world structure
 typedef struct map_t {
@@ -42,7 +44,7 @@ typedef struct bitmap_t {
 // entity structure
 typedef struct entity_t {
 	// VARS
-	double x, y, z;              // world coordinates
+	double x, y, z;                  // world coordinates
 	double ang;                      // entity angle
 	double sizex, sizey; int sizez;  // bounding box size
 	int onground, onground2;         // if 1, the entity is on the ground
@@ -60,6 +62,20 @@ typedef struct entity_t {
 	// BEHAVIOR
 	void (*behavior)(struct entity_t *handle); // pointer to behavior function
 } entity_t;
+
+// entity packet structure
+typedef struct entity_packet_t {
+	// VARS
+	double x, y, z;                 // world coordinates
+	double ang;                     // entity angle
+	double sizex, sizey; int sizez; // bounding box size
+	int onground, onground2;        // if 1, the entity is on the ground
+	char flags;                     // 8 on|off properties for the entity
+	int tex;                        // index to the sprite bitmap
+	char player;				  // set to 1 when this entity is a player
+	int skill[9];                   // general purpose integer variables
+	float fskill[9];                // general purpose floats
+} entity_packet_t;
 
 // hit structure
 typedef struct hit_t {
@@ -101,7 +117,8 @@ extern int mousex, mousey, omousex, omousey;
 extern SDL_Event event;
 
 // input vars
-extern int in_commands[17];
+#define TOTAL_COMMANDS 17
+extern int in_commands[TOTAL_COMMANDS];
 enum {
 	IN_FORWARD = 0,
 	IN_LEFT = 1,
@@ -131,6 +148,18 @@ extern int message_time;       // the time before a message will disappear
 extern int message_y;          // the vertical position of the game messages
 extern unsigned long cycles;   // number of cycles the game has been running
 
+// multiplayer vars
+#define PORT 38756
+extern IPaddress ip;
+extern UDPsocket sd, csd;
+extern UDPpacket *packet;
+extern int server, client;
+extern char *address; // ip address to the server
+extern int dialing;
+extern int client_input[TOTAL_COMMANDS];
+extern int client_keystatus[256]; // sym requires 323
+extern int client_mousestatus[5];
+
 // collision variables
 extern int gfh, gch;
 extern int stepclimb, sfh;
@@ -140,7 +169,12 @@ extern double targetx, targety; int targetz;
 #define STEPHEI 20       // maximum player stepheight
 
 extern entity_t *player;
-extern double vx, vy, vz, va, la;        // player velocities
+#define VX fskill[3]
+#define VY fskill[4]
+#define VZ fskill[5]
+#define VA fskill[6]
+#define LA fskill[7]
+#define PLAYER_NUM skill[0]
 extern double bob1, bob2, bob3;          // controls camera bobbing
 extern int run;                          // determines whether or not the player is running
 extern int noclip;
@@ -160,6 +194,8 @@ extern int weap_sound;
 extern int gunx, guny;
 extern int weap_swap[3];
 extern int weap_skill[3];
+extern int weap_mag[9];
+extern int weap_ammo[9];
 
 // game world
 extern map_t map;
@@ -184,9 +220,10 @@ extern int drawsky;                      // used to clip the sky to regions of t
 extern double sprsize; // used to resize sprites correctly regardless of resolution
 extern double texsize; // same, only for walls
 
-// the font bitmap
+// interface bitmaps
 extern SDL_Surface *font8_bmp;
 extern SDL_Surface *font16_bmp;
+extern bitmap_t console_bmp;
 
 // wall textures
 extern unsigned int texture_num;
@@ -200,7 +237,7 @@ extern bitmap_t *sprite_bmp;
 
 // weapon textures
 extern bitmap_t pistol_bmp[5];
-extern bitmap_t shotgun_bmp[9];
+extern bitmap_t shotgun_bmp[12];
 
 // sound effects (uses SDL_mixer)
 extern int audio_rate, audio_channels, audio_buffers;
@@ -214,6 +251,7 @@ extern int musicplaying;
 extern void e_Cycle();
 extern void e_ActChunk(entity_t* handle);
 #define SPLAT_AIRTIME fskill[0]
+#define SPLAT_FORCE fskill[1]
 #define SPLAT_LIFE skill[0]
 extern void e_ActSplat(entity_t* handle);
 #define CHAR_HEALTH skill[0]
@@ -233,7 +271,7 @@ extern int e_CheckCells( double tx, double ty, double tz, entity_t* me );
 extern int e_ClipVelocity( double *x, double *y, double *z, double vx, double vy, double vz, entity_t* me );
 extern void e_MoveTrace( double *x1, double *y1, double *z1, double x2, double y2, double z2, entity_t* me );
 extern hit_t e_LineTrace( entity_t *my, double x1, double y1, double z1, double angle, double vangle );
-extern void e_CheckHit( hit_t hitspot );
+extern void e_CheckHit( hit_t hitspot, int power );
 extern void e_FreeAll(void);
 extern void e_CreateEntity(void);
 extern void e_DestroyEntity(entity_t *handle);
@@ -248,7 +286,7 @@ extern void i_Message( char *fmt, ... );
 extern void i_PrintMessages(void);
 extern void i_GetFrameRate(void);
 extern void i_ReceiveInput(void);
-extern int i_GetStatus(int command);
+extern int i_GetStatus(int command, int playernum);
 extern int i_ReadConfig(char *filename);
 
 // render functions
@@ -256,6 +294,7 @@ extern void r_ClearBuffers(void);
 extern void r_FreeBmp( bitmap_t *bmp );
 extern void r_LoadBmp( char *file, bitmap_t *bmp );
 extern void r_DrawWeapons(void);
+extern void r_DrawConsole(void);
 extern void r_DrawSky( double angle, double vangle );
 extern void r_DrawColumns( double ox, double oy, int oz, double angle, double vangle );
 extern void r_DrawFloors( double ox, double oy, int oz, double angle, double vangle );

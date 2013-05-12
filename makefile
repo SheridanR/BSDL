@@ -10,7 +10,7 @@
 #################################################################################
 
 CC=gcc
-CFLAGS=-Wall -O3 -ffast-math -funroll-loops -malign-double -fstrict-aliasing
+CFLAGS=-Wall -O3 -g -ffast-math -funroll-loops -malign-double -fstrict-aliasing
 INCLUDE=-I/usr/include/SDL
 LIB1=-L/usr/lib
 LIB2=-L/usr/local/lib
@@ -18,31 +18,31 @@ LIB2=-L/usr/local/lib
 all: bsdl clean
 	
 bsdl: bsdl.o e_*.o i_*.o r_*.o a_*.o g_*.o
-	$(CC) $(CFLAGS) bsdl.o e_list.o e_collision.o e_behaviors.o i_draw.o i_funcs.o r_data.o r_draw.o r_render.o a_sound.o g_data.o g_main.o -o bsdl.exe $(LIB1) -lmingw32 -lsprig $(LIB2) -lSDLmain -lSDL -lSDL_mixer -mwindows -lpthread
+	$(CC) $(CFLAGS) $(INCLUDE) bsdl.o e_list.o e_collision.o e_behaviors.o i_draw.o i_funcs.o r_data.o r_draw.o r_render.o a_sound.o g_data.o g_main.o -o bsdl.exe $(LIB1) -lmingw32 -lsprig $(LIB2) -lSDLmain -lSDL -lSDL_mixer -lSDL_net -mwindows -lpthread
 	
 bsdl.o:
-	$(CC) $(CFLAGS) -c src/bsdl.c -o bsdl.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/bsdl.c -o bsdl.o
 	
 e_*.o:
-	$(CC) $(CFLAGS) -c src/e_list.c -o e_list.o
-	$(CC) $(CFLAGS) -c src/e_collision.c -o e_collision.o
-	$(CC) $(CFLAGS) -c src/e_behaviors.c -o e_behaviors.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/e_list.c -o e_list.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/e_collision.c -o e_collision.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/e_behaviors.c -o e_behaviors.o
 	
 i_*.o:
-	$(CC) $(CFLAGS) -c src/i_draw.c -o i_draw.o
-	$(CC) $(CFLAGS) -c src/i_funcs.c -o i_funcs.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/i_draw.c -o i_draw.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/i_funcs.c -o i_funcs.o
 	
 r_*.o:
-	$(CC) $(CFLAGS) -c src/r_data.c -o r_data.o
-	$(CC) $(CFLAGS) -c src/r_draw.c -o r_draw.o
-	$(CC) $(CFLAGS) -c src/r_render.c -o r_render.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/r_data.c -o r_data.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/r_draw.c -o r_draw.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/r_render.c -o r_render.o
 	
 a_*.o:
-	$(CC) $(CFLAGS) -c src/a_sound.c -o a_sound.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/a_sound.c -o a_sound.o
 	
 g_*.o:
-	$(CC) $(CFLAGS) -c src/g_data.c -o g_data.o
-	$(CC) $(CFLAGS) -c src/g_main.c -o g_main.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/g_data.c -o g_data.o
+	$(CC) $(CFLAGS) $(INCLUDE) -c src/g_main.c -o g_main.o
 	
 clean:
 	rm *.o

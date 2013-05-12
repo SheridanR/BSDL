@@ -9,13 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------
@@ -64,6 +57,30 @@ void e_ActChunk(entity_t* my) {
 
 -------------------------------------------------------------------------------*/
 
+void e_ActFountain(entity_t* my) {
+	my->skill[0] += timesync;
+	if( my->skill[0] > 10 ) {
+		my->skill[0]=0;
+		e_CreateEntity();
+		lastentity->behavior = &e_ActSplat;
+		lastentity->texture = &sprite_bmp[64];
+		lastentity->flags |= FLAG_PASSABLE;
+		
+		lastentity->sizex = .25;
+		lastentity->sizey = .25;
+		lastentity->sizez = 16;
+		
+		lastentity->x=my->x;
+		lastentity->y=my->y;
+		lastentity->z=my->z;
+		lastentity->ang=rand()*360;
+		
+		lastentity->SPLAT_AIRTIME = 3;
+		lastentity->SPLAT_FORCE = 2;
+		lastentity->onground=1;
+	}
+}
+
 void e_ActSplat(entity_t* my) {
 	double opx, opy; int opz;
 
@@ -71,13 +88,14 @@ void e_ActSplat(entity_t* my) {
 	if( !my->onground )
 		my->SPLAT_AIRTIME += (-1)+min(1-.006*timesync,1);
 	else {
-		my->SPLAT_AIRTIME = 0;
+		if(my->SPLAT_AIRTIME<0)
+			my->SPLAT_AIRTIME = 0;
 		my->SPLAT_LIFE += timesync;
 	}
 	
 	// move
-	opx=my->x+timesync*.0005*cos(my->ang);
-	opy=my->y+timesync*.0005*sin(my->ang);
+	opx=my->x+timesync*.0005*cos(my->ang)*my->SPLAT_FORCE;
+	opy=my->y+timesync*.0005*sin(my->ang)*my->SPLAT_FORCE;
 	opz=my->z+timesync*.2*my->SPLAT_AIRTIME;
 	e_MoveTrace( &my->x, &my->y, &my->z, opx, opy, opz, my );
 	
@@ -189,6 +207,7 @@ void e_ActChar(entity_t *my) {
 -------------------------------------------------------------------------------*/
 
 void e_ActPlayer(entity_t *my) {
+	bitmap_t temp_bmp;
 	double f, s, v, turn, look;
 	double co, si;
 	double opx, opy;
@@ -199,18 +218,18 @@ void e_ActPlayer(entity_t *my) {
 	float offset;
 	
 	// toggle thirdperson
-	if( i_GetStatus(IN_THIRDPERSON) && in_toggle1 ) {
+	if( i_GetStatus(IN_THIRDPERSON,my->PLAYER_NUM) && in_toggle1 ) {
 		in_toggle1 = 0;
 		thirdperson=(thirdperson==0);
 		if( thirdperson )
 			i_Message("Thirdperson camera activated");
 		else
 			i_Message("Thirdperson camera deactivated");
-	} else if( !i_GetStatus(IN_THIRDPERSON) )
+	} else if( !i_GetStatus(IN_THIRDPERSON,my->PLAYER_NUM) )
 		in_toggle1=1;
 	
 	// toggle noclip
-	if( i_GetStatus(IN_NOCLIP) && in_toggle2 ) {
+	if( i_GetStatus(IN_NOCLIP,my->PLAYER_NUM) && in_toggle2 ) {
 		in_toggle2 = 0;
 		noclip=(noclip==0);
 		fly=(fly==0);
@@ -218,25 +237,26 @@ void e_ActPlayer(entity_t *my) {
 			i_Message("noclip on");
 		else
 			i_Message("noclip off");
-	} else if( !i_GetStatus(IN_NOCLIP) )
+	} else if( !i_GetStatus(IN_NOCLIP,my->PLAYER_NUM) )
 		in_toggle2=1;
 	
 	// report variable status
-	if( i_GetStatus(IN_PRINTINFO) && in_toggle3 ) {
+	if( i_GetStatus(IN_PRINTINFO,my->PLAYER_NUM) && in_toggle3 ) {
 		in_toggle3=0;
-		i_Message( "X=%d Y=%d Z=%d\nAng=%f\nVang=%d\nxres=%d\nyres=%d", (int)floor(my->x), (int)floor(my->y), (int)floor(my->z), my->ang, vang, xres, yres );
-	} else if( !i_GetStatus(IN_PRINTINFO) )
+		i_Message( "cycles=%d\nxres=%d yres=%d\nserver=%d client=%d\naddress=%s\ncamx=%d camy=%d camz=%d\ncamang=%d vang=%d\n",
+		            cycles, xres, yres, server, client, address, (int)floor(camx), (int)floor(camy), (int)floor(camz), (int)floor(camang), vang );
+	} else if( !i_GetStatus(IN_PRINTINFO,my->PLAYER_NUM) )
 		in_toggle3=1;
 	
 	// play sound effect
-	if( i_GetStatus(IN_TESTSOUND) && in_toggle4 ) {
+	if( i_GetStatus(IN_TESTSOUND,my->PLAYER_NUM) && in_toggle4 ) {
 		in_toggle4=0;
 		i_Message( "Mix_PlayChannel: %d", Mix_PlayChannel(-1, sounds[0], 0));
-	} else if( !i_GetStatus(IN_TESTSOUND) )
+	} else if( !i_GetStatus(IN_TESTSOUND,my->PLAYER_NUM) )
 		in_toggle4=1;
 	
 	// toggle music
-	if( i_GetStatus(IN_TESTMUSIC) && in_toggle5 ) {
+	if( i_GetStatus(IN_TESTMUSIC,my->PLAYER_NUM) && in_toggle5 ) {
 		in_toggle5=0;
 		if(musicplaying) {
 			Mix_HaltMusic();
@@ -248,37 +268,37 @@ void e_ActPlayer(entity_t *my) {
 			if( x == 0 )
 				musicplaying=1;
 		}
-	} else if( !i_GetStatus(IN_TESTMUSIC) )
+	} else if( !i_GetStatus(IN_TESTMUSIC,my->PLAYER_NUM) )
 		in_toggle5=1;
 	
-	run = (i_GetStatus(IN_RUN)+1);
+	run = (i_GetStatus(IN_RUN,my->PLAYER_NUM)+1);
 	turn = mousex*run*.05;
 	look = -mousey*run*7;
-	f = (i_GetStatus(IN_FORWARD)-i_GetStatus(IN_BACK))*run; // forward
-	s = (i_GetStatus(IN_RIGHT)-i_GetStatus(IN_LEFT))*run; // strafe
-	v = (i_GetStatus(IN_UP)-i_GetStatus(IN_DOWN))*run; // up/down
+	f = (i_GetStatus(IN_FORWARD,my->PLAYER_NUM)-i_GetStatus(IN_BACK,my->PLAYER_NUM))*run; // forward
+	s = (i_GetStatus(IN_RIGHT,my->PLAYER_NUM)-i_GetStatus(IN_LEFT,my->PLAYER_NUM))*run; // strafe
+	v = (i_GetStatus(IN_UP,my->PLAYER_NUM)-i_GetStatus(IN_DOWN,my->PLAYER_NUM))*run; // up/down
 	
 	co = cos(my->ang); si = sin(my->ang);
-	vx += (co*f - si*s)*timesync*.000125;
-	vy += (si*f + co*s)*timesync*.000125;
-	if( fly ) vz = v*.35;
+	my->VX += (co*f - si*s)*timesync*.000125;
+	my->VY += (si*f + co*s)*timesync*.000125;
+	if( fly ) my->VZ = v*.35;
 	else {
-		if( !my->onground ) vz += (-1)+min(1-.006*timesync,1);
+		if( !my->onground ) my->VZ += (-1)+min(1-.006*timesync,1);
 		else {
-			if( !i_GetStatus(IN_JUMP) )
-				vz = 0;
+			if( !i_GetStatus(IN_JUMP,my->PLAYER_NUM) )
+				my->VZ = 0;
 			else {
-				vz = .5;
+				my->VZ = .5;
 				my->onground = 0;
 			}
 		}
 	}
-	va += turn;
-	la += look;
+	my->VA += turn;
+	my->LA += look;
 	f = max(1-.01*timesync,0);
-	vx*=f; vy*=f; if(fly) vz*=f; va*=f*.25; la*=f*.25;
+	my->VX*=f; my->VY*=f; if(fly) my->VZ*=f; my->VA*=f*.25; my->LA*=f*.25;
 	
-	if( i_GetStatus(IN_SPAWN) && in_toggle6 ) { // insert a sprite
+	if( i_GetStatus(IN_SPAWN,my->PLAYER_NUM) && in_toggle6 ) { // insert a sprite
 		in_toggle6=0;
 		e_CreateEntity();
 		lastentity->behavior = &e_ActChar;
@@ -294,7 +314,13 @@ void e_ActPlayer(entity_t *my) {
 		lastentity->ang=player->ang;
 		
 		lastentity->CHAR_HEALTH = 100;
-	} else if( !i_GetStatus(IN_SPAWN) )
+		/*e_CreateEntity();
+		lastentity->behavior = &e_ActFountain;
+		lastentity->texture = NULL;
+		lastentity->x=player->x;
+		lastentity->y=player->y;
+		lastentity->z=player->z-player->sizez+8;*/
+	} else if( !i_GetStatus(IN_SPAWN,my->PLAYER_NUM) )
 		in_toggle6=1;
 	
 	// my old position
@@ -302,23 +328,23 @@ void e_ActPlayer(entity_t *my) {
 	my->fskill[1] = my->y;
 	
 	if( noclip ) { // noclip cheat
-		my->x += vx*timesync;
-		my->y += vy*timesync;
-		my->z += vz*timesync;
+		my->x += my->VX*timesync;
+		my->y += my->VY*timesync;
+		my->z += my->VZ*timesync;
 		my->x = min(max(1,my->x),map.width-1);
 		my->y = min(max(1,my->y),map.height-1);
 		my->z = min(max(-10000,my->z),10000);
 	} else {
-		opx=my->x+vx*timesync;
-		opy=my->y+vy*timesync;
-		opz=my->z+vz*timesync;
+		opx=my->x+my->VX*timesync;
+		opy=my->y+my->VY*timesync;
+		opz=my->z+my->VZ*timesync;
 		e_MoveTrace(&my->x,&my->y,&my->z,opx,opy,opz,my);
 		my->x = min(max(my->x,.36),map.width-.36);
 		my->y = min(max(my->y,.36),map.height-.36);
 	}
 	
 	if( my->onground ) {
-		if( i_GetStatus(IN_FORWARD) || i_GetStatus(IN_LEFT) || i_GetStatus(IN_BACK) || i_GetStatus(IN_RIGHT) ) {
+		if( i_GetStatus(IN_FORWARD,my->PLAYER_NUM) || i_GetStatus(IN_LEFT,my->PLAYER_NUM) || i_GetStatus(IN_BACK,my->PLAYER_NUM) || i_GetStatus(IN_RIGHT,my->PLAYER_NUM) ) {
 			bob1 += bob3*timesync/48;
 			bob1 *= f;
 			bob2 += bob1*timesync/12;
@@ -342,15 +368,15 @@ void e_ActPlayer(entity_t *my) {
 		}
 	}
 	
-	my->ang += va;
+	my->ang += my->VA;
 	if( my->ang > PI*2 ) my->ang -= PI*2;
 	if( my->ang < 0 ) my->ang += PI*2;
-	if( la >= 1 || la <= -1 ) 
-		vang += la;
+	if( my->LA >= 1 || my->LA <= -1 ) 
+		vang += my->LA;
 	x=(yres/240.0)*114.0;
 	if( vang > x ) vang = x;
 	if( vang < -x ) vang = -x;
-	if( i_GetStatus(IN_CENTERVIEW) ) vang = 0;
+	if( i_GetStatus(IN_CENTERVIEW,my->PLAYER_NUM) ) vang = 0;
 	
 	// movement code ends
 	
@@ -360,18 +386,24 @@ void e_ActPlayer(entity_t *my) {
 	}
 	if( weap_swap[2] == 0 ) {
 		// fire the weapon
-		if( i_GetStatus(IN_ATTACK) && weap_skill[2] <= 0 && !(my->flags&FLAG_UNUSED1) ) {
+		if( i_GetStatus(IN_ATTACK,my->PLAYER_NUM) && weap_skill[2] <= 0 && !(my->flags&FLAG_UNUSED1) ) {
 			darkness = 1.02;
 			weap_anim = 1;
 			my->flags |= FLAG_UNUSED1; // holding the trigger
 			if( selected_weapon == 2 ) {
 				a_EntitySound(my,sounds[4],64);
-				e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang, vang ));
+				e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang+(((rand()%3)-1)*PI/180), vang+(rand()%11)-5 ), 25);
 			}
 			else if( selected_weapon == 3 ) {
+				weap_mag[2]--; // reduce ammo in magazine
 				a_EntitySound(my,sounds[6],64);
-				for( offset=-8; offset<=8; offset+=4 )
-					e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang+(offset*PI/180), vang ));
+				for( offset=0; offset<4; offset++ )
+					e_CheckHit(e_LineTrace( my, my->x, my->y, my->z+bob2+22, my->ang+(((rand()%5)-2)*PI/180), vang+(rand()%21)-10 ), 15);
+				
+				// animation stuff
+				temp_bmp=shotgun_bmp[1];
+				shotgun_bmp[1]=shotgun_bmp[11];
+				shotgun_bmp[11]=temp_bmp;
 			}
 		}
 		
@@ -379,13 +411,13 @@ void e_ActPlayer(entity_t *my) {
 		if( weap_anim == 0 )
 			weap_sound = 0;
 		if( selected_weapon == 3 )
-			if( weap_anim >= 5 && weap_sound == 0 ) {
+			if( weap_anim >= 7 && weap_sound == 0 ) {
 				weap_sound = 1;
 				a_EntitySound(my,sounds[5],64);
 			}
 		
 		// refire is available
-		if( !i_GetStatus(IN_ATTACK) )
+		if( !i_GetStatus(IN_ATTACK,my->PLAYER_NUM) )
 			my->flags &= ~(FLAG_UNUSED1);
 		
 		if( weap_anim == 0 ) {
@@ -427,12 +459,20 @@ void e_ActPlayer(entity_t *my) {
 			}
 		}
 		if( selected_weapon == 3 ) {
-			weap_skill[2] = 60;
+			if(weap_mag[2] == 0) {
+				weap_skill[2] = 60;
+				weap_mag[2] = 2; // reload shotgun
+			}
+			else
+				weap_skill[2] = 20;
 			weap_skill[0] += timesync;
 			if( weap_skill[0] > 30 ) {
 				weap_skill[0] = 0;
 				weap_anim++;
-				if( weap_anim > 8 ) {
+				if( weap_mag[2] == 1 && weap_anim > 2 ) {
+					weap_anim = 0;
+				}
+				else if( weap_anim > 10 ) {
 					weap_anim = 0;
 				}
 			}
@@ -468,7 +508,7 @@ void e_ActPlayer(entity_t *my) {
 	my->texture = &sprite_bmp[frame];
 	
 	// move the camera!
-	if( !thirdperson ) {
+	if( !thirdperson && !my->PLAYER_NUM ) {
 		camx = my->x;
 		camy = my->y;
 		camz = my->z+bob2+22;
@@ -477,7 +517,7 @@ void e_ActPlayer(entity_t *my) {
 	
 	// kill troops
 	entity_t *entity;
-	if( i_GetStatus(IN_KILL) )
+	if( i_GetStatus(IN_KILL,my->PLAYER_NUM) )
 		for( entity=firstentity; entity!=NULL; entity=entity->next) {
 			if( entity->behavior == &e_ActChar )
 				entity->CHAR_HEALTH = 0;

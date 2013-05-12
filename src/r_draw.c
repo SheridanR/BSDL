@@ -9,13 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 Uint32 ReadPixel(SDL_Surface *surface, int x, int y)
@@ -118,7 +111,7 @@ void r_DrawWeapons(void) {
 	//gunx += bob2*screenfactor;
 	//guny += (24+bob2+weap_swap[0])*screenfactor+vang*.05;
 	
-	if( i_GetStatus(IN_FORWARD) || i_GetStatus(IN_LEFT) || i_GetStatus(IN_BACK) || i_GetStatus(IN_RIGHT) ) {
+	if( i_GetStatus(IN_FORWARD,0) || i_GetStatus(IN_LEFT,0) || i_GetStatus(IN_BACK,0) || i_GetStatus(IN_RIGHT,0) ) {
 		if( swing < 0 ) {
 			swingmode = 0;
 			swing = 0;
@@ -172,6 +165,38 @@ void r_DrawWeapons(void) {
 	DrawPixel(screen, xres/2-1, yres/2, SDL_MapRGB( screen->format, 255, 255, 255 ));
 	DrawPixel(screen, xres/2, yres/2-1, SDL_MapRGB( screen->format, 255, 255, 255 ));
 	DrawPixel(screen, xres/2, yres/2, SDL_MapRGB( screen->format, 255, 255, 255 ));
+}
+
+/*-------------------------------------------------------------------------------
+
+	r_DrawConsole
+
+	Draws the console background or "wallpaper"
+
+-------------------------------------------------------------------------------*/
+
+void r_DrawConsole(void) {
+	float screenfactorx, screenfactory;
+	long x, y, index;
+	long picx, picy, size;
+	Uint8 *p;
+	
+	screenfactorx = ((float)(xres))/((float)console_bmp.width);
+	screenfactory = ((float)(yres))/((float)console_bmp.height);
+	size = console_bmp.width*console_bmp.height;
+	
+	for( y=0; y<yres; y++ ) {
+		p = (Uint8 *)screen->pixels + y * screen->pitch; // calculate the column we are drawing in
+		picy = y/screenfactory;
+		for( x=0; x<xres; x++ ) {
+			picx = x/screenfactorx;
+			index = (picx+picy*console_bmp.width);
+			if( index >= 0 && index < size ) {
+				index *= 4;
+				*(Uint32 *)((Uint8 *)p + x * screen->format->BytesPerPixel)=SDL_MapRGB( screen->format, console_bmp.data[index], console_bmp.data[index+1], console_bmp.data[index+2] );
+			}
+		}
+	}
 }
 
 /*-------------------------------------------------------------------------------

@@ -9,12 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------
@@ -280,7 +274,7 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, double z1, double angle, 
 		
 		ix = x1 + rx*d;
 		iy = y1 + ry*d;
-		inz += (vangle/4.5*vertfactor)*(d-d2);
+		inz += (vangle/4.75*vertfactor)*(d-d2);
 		
 		// check against the map
 		if( map.floors[inx+iny*map.width] >= map.ceilings[inx+iny*map.width] ) break;
@@ -327,11 +321,11 @@ hit_t e_LineTrace( entity_t *me, double x1, double y1, double z1, double angle, 
 
 -------------------------------------------------------------------------------*/
 
-void e_CheckHit(hit_t hitspot) {
+void e_CheckHit(hit_t hitspot, int power) {
 	if(hitspot.entity != NULL) {
 		if(hitspot.entity->behavior == &e_ActChar) { // shot an enemy
 			// hurt him
-			hitspot.entity->CHAR_HEALTH -= 20;
+			hitspot.entity->CHAR_HEALTH -= power;
 			
 			// check that he hasn't yet been shot this frame (to prevent simultaneous pain sounds)
 			if(hitspot.entity->CHAR_PAIN <= 0)
@@ -354,6 +348,8 @@ void e_CheckHit(hit_t hitspot) {
 			lastentity->ang=rand()*360;
 			
 			lastentity->SPLAT_AIRTIME = 1;
+			lastentity->SPLAT_FORCE = 1;
+			lastentity->onground=1;
 		}	
 	}
 	else {

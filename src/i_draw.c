@@ -9,13 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------

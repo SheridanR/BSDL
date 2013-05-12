@@ -9,13 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------
@@ -32,10 +25,11 @@ void e_FreeAll(void) {
 	
 	if( firstentity == NULL ) return;
 	
-	for( handle=firstentity; handle!=NULL; handle=nexthandle) {
+	handle=firstentity;
+	while(handle!=NULL) {
 		nexthandle = handle->next;
 		free(handle);
-		handle=NULL;
+		handle=nexthandle;
 	}
 	firstentity = NULL;
 	lastentity = NULL;

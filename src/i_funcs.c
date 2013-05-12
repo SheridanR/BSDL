@@ -9,13 +9,6 @@
 
 -------------------------------------------------------------------------------*/
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
 #include "bsdl.h"
 
 /*-------------------------------------------------------------------------------
@@ -42,7 +35,7 @@ void i_Message( char *fmt, ... ) {
 		if(message_str[c]==10) // line feed
 			lines++;
 	message_time = 2000;
-	message_y = -font16_bmp->h*lines*10;
+	message_y = max(message_y,-font16_bmp->h*lines*10);
 }
 
 /*-------------------------------------------------------------------------------
@@ -146,11 +139,19 @@ int i_ReadConfig(char *filename) {
 
 -------------------------------------------------------------------------------*/
 
-int i_GetStatus(int command) {
-	if( in_commands[command] >= 0 ) { // keyboard scancode
-		return keystatus[in_commands[command]];
-	} else { // other devices (i.e. mouse)
-		return mousestatus[in_commands[command]*-1];
+int i_GetStatus(int command, int playernum) {
+	if( playernum == 0 ) {
+		if( in_commands[command] >= 0 ) { // keyboard scancode
+			return keystatus[in_commands[command]];
+		} else { // other devices (i.e. mouse)
+			return mousestatus[in_commands[command]*-1];
+		}
+	} else {
+		if( client_input[command] >= 0 ) { // keyboard scancode
+			return client_keystatus[client_input[command]];
+		} else { // other devices (i.e. mouse)
+			return client_mousestatus[client_input[command]*-1];
+		}
 	}
 }
 
