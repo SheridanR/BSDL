@@ -4,7 +4,7 @@ Welcome to Bubbenstein/SDL (aka BSDL)!
 
 1) Support for multiple platforms, including Windows and Linux (it's probably possible to compile the engine for MacOS X too without any modification, but I cannot test this)
 
-2) 24-bit graphics at 640x480 resolution
+2) 24-bit graphics at 640x400 resolution
 
 3) Accurate grid-based collision detection
 
@@ -35,9 +35,9 @@ Arguments can be typed in any order, and later arguments will override previous 
 Any argument that does not use the above prefixes will be interpreted as the filename of a .bsm map file which you wish to load.
 
 Example:
-bsdl -w640 -h400 doom.bsm -config=lefty.cfg
+bsdl -w320 -h200 doom.bsm -config=lefty.cfg
 
-The above command starts BSDL at a screen resolution of 640x400 using the "lefty" config and loads the "doom.bsm" level.
+The above command starts BSDL at a screen resolution of 320x200 using the "lefty" config and loads the "doom.bsm" level.
 
 ----- IN-GAME CONTROLS -----
 

@@ -88,7 +88,7 @@ SDL_Surface *screen, *screen2;
 
 // default resolution
 int xres = 640;
-int yres = 480;
+int yres = 400;
 int vidsize = 307200; // xres*yres
 int windowed = 0; // determines whether the engine will run in a window or not
 
